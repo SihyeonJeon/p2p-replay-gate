@@ -6,7 +6,8 @@ from pathlib import Path
 
 from p2p_replay_gate.fixture import write_fixture
 from p2p_replay_gate.io import load_events, load_policy, load_scenarios
-from p2p_replay_gate.report import build_report
+from p2p_replay_gate.models import CasePolicy, P2PEvent
+from p2p_replay_gate.report import build_audit_report, build_report
 
 
 def _report():
@@ -54,6 +55,45 @@ class ReportTests(unittest.TestCase):
 
     def test_exit_code_is_zero(self) -> None:
         self.assertEqual(0, _report()["summary"]["exit_code"])
+
+    def test_audit_report_over_clean_fixture(self) -> None:
+        tmp = tempfile.TemporaryDirectory()
+        root = Path(tmp.name)
+        write_fixture(root)
+        report = build_audit_report(
+            load_events(root / "data" / "scenarios" / "base_events.jsonl"),
+            load_policy(root / "data" / "scenarios" / "policy.json"),
+        )
+        tmp.cleanup()
+        self.assertEqual(12, report["summary"]["trace_count"])
+        self.assertEqual(0, report["summary"]["critical_case_count"])
+        self.assertEqual(0, report["summary"]["exit_code"])
+
+    def test_audit_critical_exit_code_outranks_missing_policy(self) -> None:
+        events = [
+            P2PEvent("C001", "e1", "2026-01-01T09:00:00Z", "po_created", "PO-C001", "10", "V01", amount=1000.0, quantity=1.0),
+            P2PEvent("C001", "e2", "2026-01-02T09:00:00Z", "payment_cleared", "PO-C001", "10", "V01", amount=1000.0, quantity=1.0),
+            P2PEvent("C002", "e3", "2026-01-01T09:00:00Z", "po_created", "PO-C002", "10", "V02", amount=100.0, quantity=1.0),
+        ]
+        policies = {
+            "C001": CasePolicy("C001", "three_way_gr_based", 1000.0, 1.0, "V01", approval_limit=500.0),
+        }
+        report = build_audit_report(events, policies)
+        self.assertEqual(1, report["summary"]["missing_policy_count"])
+        self.assertEqual(1, report["summary"]["critical_case_count"])
+        self.assertEqual(3, report["summary"]["exit_code"])
+
+    def test_audit_coverage_counts_missing_policy_cases(self) -> None:
+        events = [
+            P2PEvent("C001", "e1", "2026-01-01T09:00:00Z", "po_created", "PO-C001", "10", "V01", amount=100.0, quantity=1.0),
+            P2PEvent("C001", "e2", "2026-01-02T09:00:00Z", "invoice_received", "PO-C001", "10", "V01", invoice_id="INV-C001", amount=100.0, quantity=1.0),
+            P2PEvent("C002", "e3", "2026-01-01T09:00:00Z", "po_created", "PO-C002", "10", "V02", amount=100.0, quantity=1.0),
+        ]
+        policies = {
+            "C001": CasePolicy("C001", "two_way", 100.0, 1.0, "V01"),
+        }
+        report = build_audit_report(events, policies)
+        self.assertEqual(0.5, report["summary"]["audit_trace_coverage"])
 
 
 if __name__ == "__main__":

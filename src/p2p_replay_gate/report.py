@@ -67,6 +67,47 @@ def build_report(
     }
 
 
+def build_audit_report(
+    events: list[P2PEvent],
+    policies: dict[str, CasePolicy],
+) -> dict[str, Any]:
+    grouped = group_events(events)
+    results = [
+        replay_case(case_events, policies[case_id])
+        for case_id, case_events in sorted(grouped.items())
+        if case_id in policies
+    ]
+    missing_policy = sorted(case_id for case_id in grouped if case_id not in policies)
+    audit_complete = sum(1 for result in results if result.audit_trace_complete)
+    total_cases = len(grouped)
+    violation_cases = [result for result in results if result.violations]
+    critical_cases = [result for result in results if result.has_critical]
+    return {
+        "run_id": "p2p-replay-gate-audit-v0",
+        "created_at": datetime.now(timezone.utc).isoformat(),
+        "evidence_grade": "external_or_imported_event_log",
+        "claim_allowed": False,
+        "scope_note": "audit report over supplied purchase-to-pay traces and user-provided policy",
+        "summary": {
+            "trace_count": len(results),
+            "missing_policy_count": len(missing_policy),
+            "violation_case_count": len(violation_cases),
+            "critical_case_count": len(critical_cases),
+            "audit_trace_coverage": _rate(audit_complete, total_cases),
+            "exit_code": _audit_exit_code(missing_policy, critical_cases, violation_cases),
+        },
+        "missing_policy": missing_policy,
+        "violations_by_code": summarize_violations(results),
+        "case_results": _results_to_rows(results),
+        "failure_queue": _case_failure_queue(results),
+        "metric_glossary": {
+            "violation_case_count": "cases with at least one emitted policy violation",
+            "critical_case_count": "cases with duplicate, vendor, early payment, or blocked-payment critical findings",
+            "audit_trace_coverage": "cases containing the events needed to audit the policy decision",
+        },
+    }
+
+
 def _scenario_row(scenario: Scenario, events: list[P2PEvent], policy: CasePolicy) -> dict[str, Any]:
     result = replay_case(events, policy)
     actual_codes = tuple(sorted({violation.code for violation in result.violations}))
@@ -126,6 +167,18 @@ def _failure_queue(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
     return sorted(queue, key=lambda item: (item["severity"] != "critical", item["scenario_id"], item["code"]))
 
 
+def _case_failure_queue(results: list[CaseResult]) -> list[dict[str, Any]]:
+    queue = []
+    for result in results:
+        for violation in result.violations:
+            if violation.severity in {"critical", "high"}:
+                queue.append({
+                    "case_id": result.case_id,
+                    **_violation_row(violation),
+                })
+    return sorted(queue, key=lambda item: (item["severity"] != "critical", item["case_id"], item["code"]))
+
+
 def _violation_row(violation) -> dict[str, Any]:
     return {
         "code": violation.code,
@@ -146,6 +199,15 @@ def _exit_code(clean_results: list[CaseResult], scenario_results: list[dict[str,
     return 0
 
 
+def _audit_exit_code(missing_policy: list[str], critical_cases: list[CaseResult], violation_cases: list[CaseResult]) -> int:
+    if critical_cases:
+        return 3
+    if missing_policy:
+        return 4
+    if violation_cases:
+        return 1
+    return 0
+
+
 def _rate(numerator: int, denominator: int) -> float:
     return numerator / max(denominator, 1)
-

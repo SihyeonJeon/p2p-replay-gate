@@ -5,10 +5,11 @@ import sys
 from pathlib import Path
 from typing import Any
 
+from .adapters import import_csv_events, write_policy_template
 from .fixture import write_fixture
 from .io import group_events, load_events, load_policy, load_scenarios, read_json, write_json
 from .oracle import replay_case
-from .report import build_report
+from .report import build_audit_report, build_report
 from .scenario import validate_scenario_expectations
 
 
@@ -36,6 +37,28 @@ def main(argv: list[str] | None = None) -> int:
     inspect_parser.add_argument("--report", type=Path, required=True, help="scorecard JSON path")
     inspect_parser.add_argument("--top", type=int, default=8, help="number of failure queue rows to print")
     inspect_parser.set_defaults(func=_inspect)
+
+    import_parser = subparsers.add_parser("import-csv", help="convert a CSV event log into P2P JSONL")
+    import_parser.add_argument("--input", type=Path, required=True, help="source event log CSV")
+    import_parser.add_argument("--output", type=Path, required=True, help="output JSONL path")
+    import_parser.add_argument("--activity-map", type=Path, default=None, help="optional JSON map from source activity to P2P event_type")
+    import_parser.add_argument("--report", type=Path, default=None, help="optional adapter report JSON path")
+    import_parser.add_argument("--strict", action="store_true", help="fail when any source activity is unmapped")
+    import_parser.set_defaults(func=_import_csv)
+
+    policy_parser = subparsers.add_parser("policy-template", help="write a policy skeleton for imported traces")
+    policy_parser.add_argument("--events", type=Path, required=True, help="imported event log JSONL")
+    policy_parser.add_argument("--output", type=Path, required=True, help="policy JSON output path")
+    policy_parser.add_argument("--flow-type", default="three_way_gr_based", help="default flow type for every case")
+    policy_parser.add_argument("--approval-limit", type=float, default=1000.0, help="approval threshold for generated policies")
+    policy_parser.add_argument("--allow-missing-amount", action="store_true", help="emit po_amount=0.0 with template warnings when amount data is missing")
+    policy_parser.set_defaults(func=_policy_template)
+
+    audit_parser = subparsers.add_parser("audit", help="audit supplied traces against a policy file")
+    audit_parser.add_argument("--events", type=Path, required=True, help="event log JSONL")
+    audit_parser.add_argument("--policy", type=Path, required=True, help="case policy JSON")
+    audit_parser.add_argument("--output", type=Path, default=Path("reports/audit.json"), help="audit report output path")
+    audit_parser.set_defaults(func=_audit)
 
     args = parser.parse_args(argv)
     try:
@@ -123,6 +146,59 @@ def _inspect(args: argparse.Namespace) -> int:
         for row in queue:
             print(f"- {row['severity']:8} {row['case_id']} {row['mutation']}: {row['code']}")
     return 0
+
+
+def _import_csv(args: argparse.Namespace) -> int:
+    stats = import_csv_events(
+        args.input,
+        args.output,
+        activity_map_path=args.activity_map,
+        report_path=args.report,
+        strict=args.strict,
+    )
+    print(
+        f"imported: rows={stats.rows_read} "
+        f"events={stats.events_written} "
+        f"skipped={stats.skipped_rows} "
+        f"output={args.output}"
+    )
+    if stats.unmapped_activities:
+        print("unmapped activities:")
+        for activity, count in sorted(stats.unmapped_activities.items()):
+            print(f"- {activity}: {count}")
+    if stats.row_errors:
+        print("row errors:")
+        for error, count in sorted(stats.row_errors.items()):
+            print(f"- {error}: {count}")
+    return 0
+
+
+def _policy_template(args: argparse.Namespace) -> int:
+    events = load_events(args.events)
+    policies = write_policy_template(
+        events,
+        args.output,
+        flow_type=args.flow_type,
+        approval_limit=args.approval_limit,
+        allow_missing_amount=args.allow_missing_amount,
+    )
+    print(f"policy template written: {args.output} ({len(policies)} cases)")
+    return 0
+
+
+def _audit(args: argparse.Namespace) -> int:
+    report = build_audit_report(load_events(args.events), load_policy(args.policy))
+    write_json(args.output, report)
+    summary = report["summary"]
+    print(f"audit written: {args.output}")
+    print(
+        "summary: "
+        f"traces={summary['trace_count']} "
+        f"violations={summary['violation_case_count']} "
+        f"critical={summary['critical_case_count']} "
+        f"missing_policy={summary['missing_policy_count']}"
+    )
+    return int(summary["exit_code"])
 
 
 def _load_inputs(args: argparse.Namespace):

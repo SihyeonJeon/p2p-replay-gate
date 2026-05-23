@@ -1,0 +1,7 @@
+{
+  "Create Purchase Order": "po_created",
+  "Record Goods Receipt": "goods_receipt",
+  "Record Invoice Receipt": "invoice_received",
+  "Manager Approved": "approval_recorded",
+  "Clear Payment": "payment_cleared"
+}

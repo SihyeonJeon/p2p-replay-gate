@@ -1,0 +1,6 @@
+case:concept:name,concept:name,time:timestamp,case:purchasing document,case:vendor,invoice,amount,qty,org:resource
+C100,Create Purchase Order,2026-01-01T09:00:00Z,PO-C100,V01,,1250,10,buyer
+C100,Record Goods Receipt,2026-01-02T09:00:00Z,PO-C100,V01,,1250,10,warehouse
+C100,Record Invoice Receipt,2026-01-03T09:00:00Z,PO-C100,V01,INV-C100,1250,10,ap
+C100,Manager Approved,2026-01-04T09:00:00Z,PO-C100,V01,INV-C100,1250,10,manager
+C100,Clear Payment,2026-01-05T09:00:00Z,PO-C100,V01,INV-C100,1250,10,batch

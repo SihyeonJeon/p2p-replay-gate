@@ -94,6 +94,27 @@ class CliTests(unittest.TestCase):
         ])
         self.assertEqual(1, code)
 
+    def test_import_csv_and_policy_template_commands(self) -> None:
+        csv_path = self.root / "events.csv"
+        jsonl_path = self.root / "events.jsonl"
+        policy_path = self.root / "policy.json"
+        csv_path.write_text(
+            "case_id,event_type,timestamp,po_id,vendor_id,invoice_id,amount,quantity\n"
+            "C900,po_created,2026-01-01T09:00:00Z,PO-C900,V90,,500,2\n"
+            "C900,invoice_received,2026-01-02T09:00:00Z,PO-C900,V90,INV-C900,500,2\n",
+            encoding="utf-8",
+        )
+        code, _, _ = self._main(["import-csv", "--input", str(csv_path), "--output", str(jsonl_path), "--strict"])
+        self.assertEqual(0, code)
+        code, _, _ = self._main(["policy-template", "--events", str(jsonl_path), "--output", str(policy_path), "--flow-type", "two_way"])
+        self.assertEqual(0, code)
+        self.assertEqual("two_way", read_json(policy_path)[0]["flow_type"])
+
+        audit_path = self.root / "audit.json"
+        code, _, _ = self._main(["audit", "--events", str(jsonl_path), "--policy", str(policy_path), "--output", str(audit_path)])
+        self.assertEqual(0, code)
+        self.assertEqual(1, read_json(audit_path)["summary"]["trace_count"])
+
 
 if __name__ == "__main__":
     unittest.main()
