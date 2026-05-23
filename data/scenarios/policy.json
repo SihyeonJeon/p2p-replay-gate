@@ -1,0 +1,122 @@
+[
+  {
+    "case_id": "C001",
+    "flow_type": "three_way_gr_based",
+    "po_amount": 1250.0,
+    "po_quantity": 10.0,
+    "vendor_id": "V01",
+    "approval_limit": 1000.0,
+    "amount_tolerance": 0.01,
+    "quantity_tolerance": 0.0
+  },
+  {
+    "case_id": "C002",
+    "flow_type": "three_way_invoice_before_gr",
+    "po_amount": 1800.0,
+    "po_quantity": 12.0,
+    "vendor_id": "V02",
+    "approval_limit": 1000.0,
+    "amount_tolerance": 0.01,
+    "quantity_tolerance": 0.0
+  },
+  {
+    "case_id": "C003",
+    "flow_type": "two_way",
+    "po_amount": 640.0,
+    "po_quantity": 4.0,
+    "vendor_id": "V03",
+    "approval_limit": 1000.0,
+    "amount_tolerance": 0.01,
+    "quantity_tolerance": 0.0
+  },
+  {
+    "case_id": "C004",
+    "flow_type": "consignment",
+    "po_amount": 2200.0,
+    "po_quantity": 20.0,
+    "vendor_id": "V04",
+    "approval_limit": 1000.0,
+    "amount_tolerance": 0.01,
+    "quantity_tolerance": 0.0
+  },
+  {
+    "case_id": "C005",
+    "flow_type": "three_way_gr_based",
+    "po_amount": 1350.0,
+    "po_quantity": 10.0,
+    "vendor_id": "V01",
+    "approval_limit": 1000.0,
+    "amount_tolerance": 0.01,
+    "quantity_tolerance": 0.0
+  },
+  {
+    "case_id": "C006",
+    "flow_type": "three_way_invoice_before_gr",
+    "po_amount": 1900.0,
+    "po_quantity": 12.0,
+    "vendor_id": "V02",
+    "approval_limit": 1000.0,
+    "amount_tolerance": 0.01,
+    "quantity_tolerance": 0.0
+  },
+  {
+    "case_id": "C007",
+    "flow_type": "two_way",
+    "po_amount": 740.0,
+    "po_quantity": 4.0,
+    "vendor_id": "V03",
+    "approval_limit": 1000.0,
+    "amount_tolerance": 0.01,
+    "quantity_tolerance": 0.0
+  },
+  {
+    "case_id": "C008",
+    "flow_type": "consignment",
+    "po_amount": 2300.0,
+    "po_quantity": 20.0,
+    "vendor_id": "V04",
+    "approval_limit": 1000.0,
+    "amount_tolerance": 0.01,
+    "quantity_tolerance": 0.0
+  },
+  {
+    "case_id": "C009",
+    "flow_type": "three_way_gr_based",
+    "po_amount": 1450.0,
+    "po_quantity": 10.0,
+    "vendor_id": "V01",
+    "approval_limit": 1000.0,
+    "amount_tolerance": 0.01,
+    "quantity_tolerance": 0.0
+  },
+  {
+    "case_id": "C010",
+    "flow_type": "three_way_invoice_before_gr",
+    "po_amount": 2000.0,
+    "po_quantity": 12.0,
+    "vendor_id": "V02",
+    "approval_limit": 1000.0,
+    "amount_tolerance": 0.01,
+    "quantity_tolerance": 0.0
+  },
+  {
+    "case_id": "C011",
+    "flow_type": "two_way",
+    "po_amount": 840.0,
+    "po_quantity": 4.0,
+    "vendor_id": "V03",
+    "approval_limit": 1000.0,
+    "amount_tolerance": 0.01,
+    "quantity_tolerance": 0.0
+  },
+  {
+    "case_id": "C012",
+    "flow_type": "consignment",
+    "po_amount": 2400.0,
+    "po_quantity": 20.0,
+    "vendor_id": "V04",
+    "approval_limit": 1000.0,
+    "amount_tolerance": 0.01,
+    "quantity_tolerance": 0.0
+  }
+]

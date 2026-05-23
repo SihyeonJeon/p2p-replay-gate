@@ -1,0 +1,281 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>p2p-replay-gate</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #151515;
+      --muted: #64686f;
+      --line: #d9ddd6;
+      --paper: #f7f6f1;
+      --panel: #ffffff;
+      --accent: #1f6f59;
+      --accent-2: #a53f2b;
+      --accent-3: #254d8b;
+      --soft: #e9efe8;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: var(--ink);
+      background: var(--paper);
+      line-height: 1.48;
+    }
+    main {
+      width: min(1120px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 48px 0 72px;
+    }
+    header {
+      display: grid;
+      grid-template-columns: minmax(0, 1.25fr) minmax(280px, 0.75fr);
+      gap: 32px;
+      align-items: end;
+      border-bottom: 1px solid var(--line);
+      padding-bottom: 32px;
+    }
+    h1, h2, h3, p { margin: 0; }
+    h1 {
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: clamp(44px, 7vw, 86px);
+      line-height: 0.92;
+      letter-spacing: 0;
+      max-width: 780px;
+    }
+    .dek {
+      max-width: 640px;
+      margin-top: 18px;
+      font-size: 18px;
+      color: var(--muted);
+    }
+    .run-card {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 18px;
+    }
+    .eyebrow {
+      color: var(--accent);
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+    .command {
+      margin-top: 12px;
+      padding: 12px;
+      border-radius: 6px;
+      background: #171717;
+      color: #f7f6f1;
+      font: 13px/1.55 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      overflow-x: auto;
+      white-space: pre;
+    }
+    section {
+      padding-top: 34px;
+    }
+    .metrics {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 14px;
+    }
+    .metric {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 18px;
+      min-height: 136px;
+    }
+    .metric strong {
+      display: block;
+      margin-top: 8px;
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: 42px;
+      line-height: 1;
+      letter-spacing: 0;
+    }
+    .metric span {
+      display: block;
+      margin-top: 10px;
+      color: var(--muted);
+      font-size: 14px;
+    }
+    .ratio {
+      margin-top: 14px;
+      height: 8px;
+      border-radius: 99px;
+      background: #dde4dd;
+      overflow: hidden;
+    }
+    .ratio > i {
+      display: block;
+      height: 100%;
+      background: var(--accent);
+    }
+    .flow {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 10px;
+    }
+    .step {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 16px;
+      min-height: 142px;
+    }
+    .step b {
+      display: block;
+      color: var(--accent-3);
+      margin-bottom: 8px;
+    }
+    .step p {
+      color: var(--muted);
+      font-size: 14px;
+    }
+    .grid-two {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      gap: 18px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      overflow: hidden;
+      display: table;
+    }
+    th, td {
+      border-bottom: 1px solid var(--line);
+      padding: 11px 13px;
+      text-align: left;
+      font-size: 14px;
+      vertical-align: top;
+    }
+    th {
+      color: var(--muted);
+      font-weight: 700;
+      background: var(--soft);
+    }
+    tr:last-child td { border-bottom: 0; }
+    .tag {
+      display: inline-block;
+      padding: 3px 7px;
+      border-radius: 5px;
+      background: #f0e5df;
+      color: var(--accent-2);
+      font-size: 12px;
+      font-weight: 700;
+    }
+    .note {
+      color: var(--muted);
+      font-size: 14px;
+      margin-top: 10px;
+    }
+    @media (max-width: 840px) {
+      header, .grid-two { grid-template-columns: 1fr; }
+      .metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .flow { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 520px) {
+      main { width: min(100% - 24px, 1120px); padding-top: 28px; }
+      .metrics { grid-template-columns: 1fr; }
+      h1 { font-size: 42px; }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <div>
+        <div class="eyebrow">purchase-to-pay replay oracle</div>
+        <h1>Catch AP agent failures before payment</h1>
+        <p class="dek">A small replay gate for invoice agents: duplicate invoice, vendor mismatch, missing receipt, missing approval, active holds, and consignment leakage.</p>
+      </div>
+      <aside class="run-card">
+        <div class="eyebrow">run</div>
+        <div class="command">python -m pip install -e .
+p2p-replay-gate validate --events data/scenarios/base_events.jsonl --scenario-pack data/scenarios/injected_scenarios.json
+p2p-replay-gate run --events data/scenarios/base_events.jsonl --scenario-pack data/scenarios/injected_scenarios.json --output reports/scorecard.json</div>
+      </aside>
+    </header>
+
+    <section>
+      <div class="metrics">
+        <div class="metric">
+          <div class="eyebrow">clean traces</div>
+          <strong>12</strong>
+          <span>2-way, 3-way, invoice-before-GR, consignment</span>
+        </div>
+        <div class="metric">
+          <div class="eyebrow">seeded defects</div>
+          <strong>48</strong>
+          <span>unique replay scenarios, all expectation-checked</span>
+        </div>
+        <div class="metric">
+          <div class="eyebrow">critical caught</div>
+          <strong>36/36</strong>
+          <span>duplicate, vendor, early payment, blocked payment</span>
+          <div class="ratio" aria-label="critical catch rate"><i style="width:100%"></i></div>
+        </div>
+        <div class="metric">
+          <div class="eyebrow">false holds</div>
+          <strong>0</strong>
+          <span>unnecessary holds emitted on clean traces</span>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <h2>Replay Shape</h2>
+      <p class="note">The gate tests workflow state, not only final labels.</p>
+      <div class="flow" style="margin-top:14px">
+        <div class="step"><b>PO</b><p>case policy, vendor, amount, quantity, approval threshold</p></div>
+        <div class="step"><b>Evidence</b><p>goods receipt, invoice, hold, release, approval, payment</p></div>
+        <div class="step"><b>Mutation</b><p>seeded defect inserted into a clean trace or replay replacement</p></div>
+        <div class="step"><b>Oracle</b><p>stateful rule evaluation with event-level evidence</p></div>
+        <div class="step"><b>Scorecard</b><p>JSON report with summary, failure queue, and metric glossary</p></div>
+      </div>
+    </section>
+
+    <section class="grid-two">
+      <div>
+        <h2>Scenario Pack</h2>
+        <table style="margin-top:14px">
+          <thead><tr><th>Mutation</th><th>Count</th><th>Policy signal</th></tr></thead>
+          <tbody>
+            <tr><td>duplicate_invoice</td><td>12</td><td><span class="tag">critical</span></td></tr>
+            <tr><td>vendor_mismatch</td><td>12</td><td><span class="tag">critical</span></td></tr>
+            <tr><td>amount_overbill</td><td>6</td><td>value mismatch</td></tr>
+            <tr><td>quantity_mismatch</td><td>3</td><td>quantity mismatch</td></tr>
+            <tr><td>payment_before_gr</td><td>3</td><td><span class="tag">critical</span></td></tr>
+            <tr><td>payment_before_approval</td><td>3</td><td><span class="tag">critical</span></td></tr>
+            <tr><td>payment_while_blocked</td><td>3</td><td><span class="tag">critical</span></td></tr>
+            <tr><td>consignment_invoice</td><td>3</td><td>PO-level invoice leak</td></tr>
+            <tr><td>consignment_duplicate_invoice</td><td>3</td><td><span class="tag">critical</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div>
+        <h2>Metric Notes</h2>
+        <table style="margin-top:14px">
+          <thead><tr><th>Metric</th><th>Meaning</th></tr></thead>
+          <tbody>
+            <tr><td>critical caught</td><td>seeded critical rows where every expected code was emitted</td></tr>
+            <tr><td>duplicate recall</td><td>duplicate invoice scenarios caught by duplicate rule</td></tr>
+            <tr><td>false holds</td><td>clean traces that produced an unnecessary hold finding</td></tr>
+            <tr><td>audit coverage</td><td>runs containing the events needed to audit the policy decision</td></tr>
+          </tbody>
+        </table>
+        <p class="note">Fixture evidence only. No real vendor, invoice, payment, or company data is included.</p>
+      </div>
+    </section>
+  </main>
+</body>
+</html>

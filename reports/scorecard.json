@@ -1,0 +1,2794 @@
+{
+  "run_id": "p2p-replay-gate-v0",
+  "created_at": "2026-05-23T10:27:27.563829+00:00",
+  "evidence_grade": "synthetic_fixture",
+  "claim_allowed": false,
+  "scope_note": "synthetic purchase-to-pay replay fixture; no real payment or vendor data",
+  "summary": {
+    "clean_trace_count": 12,
+    "scenario_count": 48,
+    "critical_policy_violations_caught": 36,
+    "critical_policy_violations_expected": 36,
+    "duplicate_catch_recall": 1.0,
+    "false_holds_on_clean_traces": 0,
+    "audit_trace_coverage": 0.95,
+    "deterministic_replay": true,
+    "exit_code": 0
+  },
+  "clean_violations": [],
+  "scenario_violations_by_code": {
+    "CONSIGNMENT_INVOICE": 18,
+    "DUPLICATE_INVOICE": 15,
+    "PAYMENT_BEFORE_APPROVAL": 6,
+    "PAYMENT_BEFORE_GR": 3,
+    "PAYMENT_WHILE_BLOCKED": 3,
+    "QUANTITY_MISMATCH": 12,
+    "UNNEEDED_HOLD": 3,
+    "VALUE_MISMATCH": 15,
+    "VENDOR_MISMATCH": 12
+  },
+  "scenario_results": [
+    {
+      "scenario_id": "S-C001-duplicate_invoice",
+      "case_id": "C001",
+      "mutation": "duplicate_invoice",
+      "description": "duplicate invoice",
+      "expected_codes": [
+        "DUPLICATE_INVOICE"
+      ],
+      "actual_codes": [
+        "DUPLICATE_INVOICE",
+        "QUANTITY_MISMATCH",
+        "VALUE_MISMATCH"
+      ],
+      "passed": true,
+      "audit_trace_complete": true,
+      "violations": [
+        {
+          "code": "DUPLICATE_INVOICE",
+          "severity": "critical",
+          "event_id": "C001-08-invoice_received-INV-C001",
+          "message": "invoice INV-C001 was seen more than once",
+          "evidence": {
+            "invoice_id": "INV-C001"
+          }
+        },
+        {
+          "code": "VALUE_MISMATCH",
+          "severity": "high",
+          "event_id": "C001-08-invoice_received-INV-C001",
+          "message": "invoice amount does not match PO amount within tolerance",
+          "evidence": {
+            "po_amount": 1250.0,
+            "invoice_amount": 2500.0,
+            "delta": 1250.0
+          }
+        },
+        {
+          "code": "QUANTITY_MISMATCH",
+          "severity": "high",
+          "event_id": "C001-08-invoice_received-INV-C001",
+          "message": "invoice quantity does not match PO quantity within tolerance",
+          "evidence": {
+            "po_quantity": 10.0,
+            "invoice_quantity": 20.0,
+            "delta": 10.0
+          }
+        }
+      ]
+    },
+    {
+      "scenario_id": "S-C001-vendor_mismatch",
+      "case_id": "C001",
+      "mutation": "vendor_mismatch",
+      "description": "vendor mismatch",
+      "expected_codes": [
+        "VENDOR_MISMATCH"
+      ],
+      "actual_codes": [
+        "VENDOR_MISMATCH"
+      ],
+      "passed": true,
+      "audit_trace_complete": true,
+      "violations": [
+        {
+          "code": "VENDOR_MISMATCH",
+          "severity": "critical",
+          "event_id": "C001-08-invoice_received-BAD-INV-C001",
+          "message": "event vendor V99 differs from PO vendor V01",
+          "evidence": {
+            "expected": "V01",
+            "actual": "V99"
+          }
+        }
+      ]
+    },
+    {
+      "scenario_id": "S-C001-amount_overbill",
+      "case_id": "C001",
+      "mutation": "amount_overbill",
+      "description": "amount overbill",
+      "expected_codes": [
+        "VALUE_MISMATCH"
+      ],
+      "actual_codes": [
+        "VALUE_MISMATCH"
+      ],
+      "passed": true,
+      "audit_trace_complete": true,
+      "violations": [
+        {
+          "code": "VALUE_MISMATCH",
+          "severity": "high",
+          "event_id": "C001-08-invoice_received-OVER-INV-C001",
+          "message": "invoice amount does not match PO amount within tolerance",
+          "evidence": {
+            "po_amount": 1250.0,
+            "invoice_amount": 1325.0,
+            "delta": 75.0
+          }
+        }
+      ]
+    },
+    {
+      "scenario_id": "S-C001-payment_before_gr",
+      "case_id": "C001",
+      "mutation": "payment_before_gr",
+      "description": "payment before gr",
+      "expected_codes": [
+        "PAYMENT_BEFORE_GR"
+      ],
+      "actual_codes": [
+        "PAYMENT_BEFORE_APPROVAL",
+        "PAYMENT_BEFORE_GR"
+      ],
+      "passed": true,
+      "audit_trace_complete": true,
+      "violations": [
+        {
+          "code": "PAYMENT_BEFORE_GR",
+          "severity": "critical",
+          "event_id": "C001-00-payment_cleared-EARLY-INV-C001",
+          "message": "payment cleared before required goods receipt",
+          "evidence": {
+            "received_amount": 0.0
+          }
+        },
+        {
+          "code": "PAYMENT_BEFORE_APPROVAL",
+          "severity": "critical",
+          "event_id": "C001-00-payment_cleared-EARLY-INV-C001",
+          "message": "payment cleared before required approval",
+          "evidence": {
+            "approval_limit": 1000.0,
+            "po_amount": 1250.0
+          }
+        }
+      ]
+    },
+    {
+      "scenario_id": "S-C002-duplicate_invoice",
+      "case_id": "C002",
+      "mutation": "duplicate_invoice",
+      "description": "duplicate invoice",
+      "expected_codes": [
+        "DUPLICATE_INVOICE"
+      ],
+      "actual_codes": [
+        "DUPLICATE_INVOICE",
+        "QUANTITY_MISMATCH",
+        "VALUE_MISMATCH"
+      ],
+      "passed": true,
+      "audit_trace_complete": true,
+      "violations": [
+        {
+          "code": "DUPLICATE_INVOICE",
+          "severity": "critical",
+          "event_id": "C002-08-invoice_received-INV-C002",
+          "message": "invoice INV-C002 was seen more than once",
+          "evidence": {
+            "invoice_id": "INV-C002"
+          }
+        },
+        {
+          "code": "VALUE_MISMATCH",
+          "severity": "high",
+          "event_id": "C002-08-invoice_received-INV-C002",
+          "message": "invoice amount does not match PO amount within tolerance",
+          "evidence": {
+            "po_amount": 1800.0,
+            "invoice_amount": 3600.0,
+            "delta": 1800.0
+          }
+        },
+        {
+          "code": "QUANTITY_MISMATCH",
+          "severity": "high",
+          "event_id": "C002-08-invoice_received-INV-C002",
+          "message": "invoice quantity does not match PO quantity within tolerance",
+          "evidence": {
+            "po_quantity": 12.0,
+            "invoice_quantity": 24.0,
+            "delta": 12.0
+          }
+        }
+      ]
+    },
+    {
+      "scenario_id": "S-C002-vendor_mismatch",
+      "case_id": "C002",
+      "mutation": "vendor_mismatch",
+      "description": "vendor mismatch",
+      "expected_codes": [
+        "VENDOR_MISMATCH"
+      ],
+      "actual_codes": [
+        "VENDOR_MISMATCH"
+      ],
+      "passed": true,
+      "audit_trace_complete": true,
+      "violations": [
+        {
+          "code": "VENDOR_MISMATCH",
+          "severity": "critical",
+          "event_id": "C002-08-invoice_received-BAD-INV-C002",
+          "message": "event vendor V99 differs from PO vendor V02",
+          "evidence": {
+            "expected": "V02",
+            "actual": "V99"
+          }
+        }
+      ]
+    },
+    {
+      "scenario_id": "S-C002-quantity_mismatch",
+      "case_id": "C002",
+      "mutation": "quantity_mismatch",
+      "description": "quantity mismatch",
+      "expected_codes": [
+        "QUANTITY_MISMATCH"
+      ],
+      "actual_codes": [
+        "QUANTITY_MISMATCH"
+      ],
+      "passed": true,
+      "audit_trace_complete": true,
+      "violations": [
+        {
+          "code": "QUANTITY_MISMATCH",
+          "severity": "high",
+          "event_id": "C002-08-invoice_received-QTY-INV-C002",
+          "message": "invoice quantity does not match PO quantity within tolerance",
+          "evidence": {
+            "po_quantity": 12.0,
+            "invoice_quantity": 13.0,
+            "delta": 1.0
+          }
+        }
+      ]
+    },
+    {
+      "scenario_id": "S-C002-payment_before_approval",
+      "case_id": "C002",
+      "mutation": "payment_before_approval",
+      "description": "payment before approval",
+      "expected_codes": [
+        "PAYMENT_BEFORE_APPROVAL"
+      ],
+      "actual_codes": [
+        "PAYMENT_BEFORE_APPROVAL"
+      ],
+      "passed": true,
+      "audit_trace_complete": false,
+      "violations": [
+        {
+          "code": "PAYMENT_BEFORE_APPROVAL",
+          "severity": "critical",
+          "event_id": "C002-04-payment_cleared-INV-C002",
+          "message": "payment cleared before required approval",
+          "evidence": {
+            "approval_limit": 1000.0,
+            "po_amount": 1800.0
+          }
+        }
+      ]
+    },
+    {
+      "scenario_id": "S-C003-duplicate_invoice",
+      "case_id": "C003",
+      "mutation": "duplicate_invoice",
+      "description": "duplicate invoice",
+      "expected_codes": [
+        "DUPLICATE_INVOICE"
+      ],
+      "actual_codes": [
+        "DUPLICATE_INVOICE",
+        "QUANTITY_MISMATCH",
+        "VALUE_MISMATCH"
+      ],
+      "passed": true,
+      "audit_trace_complete": true,
+      "violations": [
+        {
+          "code": "DUPLICATE_INVOICE",
+          "severity": "critical",
+          "event_id": "C003-08-invoice_received-INV-C003",
+          "message": "invoice INV-C003 was seen more than once",
+          "evidence": {
+            "invoice_id": "INV-C003"
+          }
+        },
+        {
+          "code": "VALUE_MISMATCH",
+          "severity": "high",
+          "event_id": "C003-08-invoice_received-INV-C003",
+          "message": "invoice amount does not match PO amount within tolerance",
+          "evidence": {
+            "po_amount": 640.0,
+            "invoice_amount": 1280.0,
+            "delta": 640.0
+          }
+        },
+        {
+          "code": "QUANTITY_MISMATCH",
+          "severity": "high",
+          "event_id": "C003-08-invoice_received-INV-C003",
+          "message": "invoice quantity does not match PO quantity within tolerance",
+          "evidence": {
+            "po_quantity": 4.0,
+            "invoice_quantity": 8.0,
+            "delta": 4.0
+          }
+        }
+      ]
+    },
+    {
+      "scenario_id": "S-C003-vendor_mismatch",
+      "case_id": "C003",
+      "mutation": "vendor_mismatch",
+      "description": "vendor mismatch",
+      "expected_codes": [
+        "VENDOR_MISMATCH"
+      ],
+      "actual_codes": [
+        "VENDOR_MISMATCH"
+      ],
+      "passed": true,
+      "audit_trace_complete": true,
+      "violations": [
+        {
+          "code": "VENDOR_MISMATCH",
+          "severity": "critical",
+          "event_id": "C003-08-invoice_received-BAD-INV-C003",
+          "message": "event vendor V99 differs from PO vendor V03",
+          "evidence": {
+            "expected": "V03",
+            "actual": "V99"
+          }
+        }
+      ]
+    },
+    {
+      "scenario_id": "S-C003-amount_overbill",
+      "case_id": "C003",
+      "mutation": "amount_overbill",
+      "description": "amount overbill",
+      "expected_codes": [
+        "VALUE_MISMATCH"
+      ],
+      "actual_codes": [
+        "VALUE_MISMATCH"
+      ],
+      "passed": true,
+      "audit_trace_complete": true,
+      "violations": [
+        {
+          "code": "VALUE_MISMATCH",
+          "severity": "high",
+          "event_id": "C003-08-invoice_received-OVER-INV-C003",
+          "message": "invoice amount does not match PO amount within tolerance",
+          "evidence": {
+            "po_amount": 640.0,
+            "invoice_amount": 715.0,
+            "delta": 75.0
+          }
+        }
+      ]
+    },
+    {
+      "scenario_id": "S-C003-payment_while_blocked",
+      "case_id": "C003",
+      "mutation": "payment_while_blocked",
+      "description": "payment while blocked",
+      "expected_codes": [
+        "PAYMENT_WHILE_BLOCKED"
+      ],
+      "actual_codes": [
+        "PAYMENT_WHILE_BLOCKED",
+        "UNNEEDED_HOLD"
+      ],
+      "passed": true,
+      "audit_trace_complete": true,
+      "violations": [
+        {
+          "code": "UNNEEDED_HOLD",
+          "severity": "low",
+          "event_id": "C003-03-invoice_blocked-INV-C003",
+          "message": "invoice INV-C003 was held even though required evidence was already present",
+          "evidence": {
+            "invoice_id": "INV-C003"
+          }
+        },
+        {
+          "code": "PAYMENT_WHILE_BLOCKED",
+          "severity": "critical",
+          "event_id": "C003-04-payment_cleared-INV-C003",
+          "message": "payment cleared while invoice hold was still active",
+          "evidence": {
+            "blocked_invoice_ids": [
+              "INV-C003"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "scenario_id": "S-C004-duplicate_invoice",
+      "case_id": "C004",
+      "mutation": "duplicate_invoice",
+      "description": "duplicate invoice",
+      "expected_codes": [
+        "CONSIGNMENT_INVOICE",
+        "DUPLICATE_INVOICE"
+      ],
+      "actual_codes": [
+        "CONSIGNMENT_INVOICE",
+        "DUPLICATE_INVOICE"
+      ],
+      "passed": true,
+      "audit_trace_complete": true,
+      "violations": [
+        {
+          "code": "CONSIGNMENT_INVOICE",
+          "severity": "high",
+          "event_id": "C004-03-invoice_received-INV-C004",
+          "message": "consignment flow should not receive PO-level invoice",
+          "evidence": {
+            "invoice_id": "INV-C004"
+          }
+        },
+        {
+          "code": "DUPLICATE_INVOICE",
+          "severity": "critical",
+          "event_id": "C004-04-invoice_received-INV-C004",
+          "message": "invoice INV-C004 was seen more than once",
+          "evidence": {
+            "invoice_id": "INV-C004"
+          }
+        },
+        {
+          "code": "CONSIGNMENT_INVOICE",
+          "severity": "high",
+          "event_id": "C004-04-invoice_received-INV-C004",
+          "message": "consignment flow should not receive PO-level invoice",
+          "evidence": {
+            "invoice_id": "INV-C004"
+          }
+        }
+      ]
+    },
+    {
+      "scenario_id": "S-C004-vendor_mismatch",
+      "case_id": "C004",
+      "mutation": "vendor_mismatch",
+      "description": "vendor mismatch",
+      "expected_codes": [
+        "VENDOR_MISMATCH"
+      ],
+      "actual_codes": [
+        "CONSIGNMENT_INVOICE",
+        "VENDOR_MISMATCH"
+      ],
+      "passed": true,
+      "audit_trace_complete": true,
+      "violations": [
+        {
+          "code": "VENDOR_MISMATCH",
+          "severity": "critical",
+          "event_id": "C004-08-invoice_received-BAD-INV-C004",
+          "message": "event vendor V99 differs from PO vendor V04",
+          "evidence": {
+            "expected": "V04",
+            "actual": "V99"
+          }
+        },
+        {
+          "code": "CONSIGNMENT_INVOICE",
+          "severity": "high",
+          "event_id": "C004-08-invoice_received-BAD-INV-C004",
+          "message": "consignment flow should not receive PO-level invoice",
+          "evidence": {
+            "invoice_id": "BAD-INV-C004"
+          }
+        }
+      ]
+    },
+    {
+      "scenario_id": "S-C004-consignment_invoice",
+      "case_id": "C004",
+      "mutation": "consignment_invoice",
+      "description": "consignment invoice",
+      "expected_codes": [
+        "CONSIGNMENT_INVOICE"
+      ],
+      "actual_codes": [
+        "CONSIGNMENT_INVOICE"
+      ],
+      "passed": true,
+      "audit_trace_complete": true,
+      "violations": [
+        {
+          "code": "CONSIGNMENT_INVOICE",
+          "severity": "high",
+          "event_id": "C004-03-invoice_received-INV-C004",
+          "message": "consignment flow should not receive PO-level invoice",
+          "evidence": {
+            "invoice_id": "INV-C004"
+          }
+        }
+      ]
+    },
+    {
+      "scenario_id": "S-C004-consignment_duplicate_invoice",
+      "case_id": "C004",
+      "mutation": "consignment_duplicate_invoice",
+      "description": "consignment duplicate invoice",
+      "expected_codes": [
+        "CONSIGNMENT_INVOICE",
+        "DUPLICATE_INVOICE"
+      ],
+      "actual_codes": [
+        "CONSIGNMENT_INVOICE",
+        "DUPLICATE_INVOICE"
+      ],
+      "passed": true,
+      "audit_trace_complete": true,
+      "violations": [
+        {
+          "code": "CONSIGNMENT_INVOICE",
+          "severity": "high",
+          "event_id": "C004-03-invoice_received-INV-C004",
+          "message": "consignment flow should not receive PO-level invoice",
+          "evidence": {
+            "invoice_id": "INV-C004"
+          }
+        },
+        {
+          "code": "DUPLICATE_INVOICE",
+          "severity": "critical",
+          "event_id": "C004-04-invoice_received-INV-C004",
+          "message": "invoice INV-C004 was seen more than once",
+          "evidence": {
+            "invoice_id": "INV-C004"
+          }
+        },
+        {
+          "code": "CONSIGNMENT_INVOICE",
+          "severity": "high",
+          "event_id": "C004-04-invoice_received-INV-C004",
+          "message": "consignment flow should not receive PO-level invoice",
+          "evidence": {
+            "invoice_id": "INV-C004"
+          }
+        }
+      ]
+    },
+    {
+      "scenario_id": "S-C005-duplicate_invoice",
+      "case_id": "C005",
+      "mutation": "duplicate_invoice",
+      "description": "duplicate invoice",
+      "expected_codes": [
+        "DUPLICATE_INVOICE"
+      ],
+      "actual_codes": [
+        "DUPLICATE_INVOICE",
+        "QUANTITY_MISMATCH",
+        "VALUE_MISMATCH"
+      ],
+      "passed": true,
+      "audit_trace_complete": true,
+      "violations": [
+        {
+          "code": "DUPLICATE_INVOICE",
+          "severity": "critical",
+          "event_id": "C005-08-invoice_received-INV-C005",
+          "message": "invoice INV-C005 was seen more than once",
+          "evidence": {
+            "invoice_id": "INV-C005"
+          }
+        },
+        {
+          "code": "VALUE_MISMATCH",
+          "severity": "high",
+          "event_id": "C005-08-invoice_received-INV-C005",
+          "message": "invoice amount does not match PO amount within tolerance",
+          "evidence": {
+            "po_amount": 1350.0,
+            "invoice_amount": 2700.0,
+            "delta": 1350.0
+          }
+        },
+        {
+          "code": "QUANTITY_MISMATCH",
+          "severity": "high",
+          "event_id": "C005-08-invoice_received-INV-C005",
+          "message": "invoice quantity does not match PO quantity within tolerance",
+          "evidence": {
+            "po_quantity": 10.0,
+            "invoice_quantity": 20.0,
+            "delta": 10.0
+          }
+        }
+      ]
+    },
+    {
+      "scenario_id": "S-C005-vendor_mismatch",
+      "case_id": "C005",
+      "mutation": "vendor_mismatch",
+      "description": "vendor mismatch",
+      "expected_codes": [
+        "VENDOR_MISMATCH"
+      ],
+      "actual_codes": [
+        "VENDOR_MISMATCH"
+      ],
+      "passed": true,
+      "audit_trace_complete": true,
+      "violations": [
+        {
+          "code": "VENDOR_MISMATCH",
+          "severity": "critical",
+          "event_id": "C005-08-invoice_received-BAD-INV-C005",
+          "message": "event vendor V99 differs from PO vendor V01",
+          "evidence": {
+            "expected": "V01",
+            "actual": "V99"
+          }
+        }
+      ]
+    },
+    {
+      "scenario_id": "S-C005-amount_overbill",
+      "case_id": "C005",
+      "mutation": "amount_overbill",
+      "description": "amount overbill",
+      "expected_codes": [
+        "VALUE_MISMATCH"
+      ],
+      "actual_codes": [
+        "VALUE_MISMATCH"
+      ],
+      "passed": true,
+      "audit_trace_complete": true,
+      "violations": [
+        {
+          "code": "VALUE_MISMATCH",
+          "severity": "high",
+          "event_id": "C005-08-invoice_received-OVER-INV-C005",
+          "message": "invoice amount does not match PO amount within tolerance",
+          "evidence": {
+            "po_amount": 1350.0,
+            "invoice_amount": 1425.0,
+            "delta": 75.0
+          }
+        }
+      ]
+    },
+    {
+      "scenario_id": "S-C005-payment_before_gr",
+      "case_id": "C005",
+      "mutation": "payment_before_gr",
+      "description": "payment before gr",
+      "expected_codes": [
+        "PAYMENT_BEFORE_GR"
+      ],
+      "actual_codes": [
+        "PAYMENT_BEFORE_APPROVAL",
+        "PAYMENT_BEFORE_GR"
+      ],
+      "passed": true,
+      "audit_trace_complete": true,
+      "violations": [
+        {
+          "code": "PAYMENT_BEFORE_GR",
+          "severity": "critical",
+          "event_id": "C005-00-payment_cleared-EARLY-INV-C005",
+          "message": "payment cleared before required goods receipt",
+          "evidence": {
+            "received_amount": 0.0
+          }
+        },
+        {
+          "code": "PAYMENT_BEFORE_APPROVAL",
+          "severity": "critical",
+          "event_id": "C005-00-payment_cleared-EARLY-INV-C005",
+          "message": "payment cleared before required approval",
+          "evidence": {
+            "approval_limit": 1000.0,
+            "po_amount": 1350.0
+          }
+        }
+      ]
+    },
+    {
+      "scenario_id": "S-C006-duplicate_invoice",
+      "case_id": "C006",
+      "mutation": "duplicate_invoice",
+      "description": "duplicate invoice",
+      "expected_codes": [
+        "DUPLICATE_INVOICE"
+      ],
+      "actual_codes": [
+        "DUPLICATE_INVOICE",
+        "QUANTITY_MISMATCH",
+        "VALUE_MISMATCH"
+      ],
+      "passed": true,
+      "audit_trace_complete": true,
+      "violations": [
+        {
+          "code": "DUPLICATE_INVOICE",
+          "severity": "critical",
+          "event_id": "C006-08-invoice_received-INV-C006",
+          "message": "invoice INV-C006 was seen more than once",
+          "evidence": {
+            "invoice_id": "INV-C006"
+          }
+        },
+        {
+          "code": "VALUE_MISMATCH",
+          "severity": "high",
+          "event_id": "C006-08-invoice_received-INV-C006",
+          "message": "invoice amount does not match PO amount within tolerance",
+          "evidence": {
+            "po_amount": 1900.0,
+            "invoice_amount": 3800.0,
+            "delta": 1900.0
+          }
+        },
+        {
+          "code": "QUANTITY_MISMATCH",
+          "severity": "high",
+          "event_id": "C006-08-invoice_received-INV-C006",
+          "message": "invoice quantity does not match PO quantity within tolerance",
+          "evidence": {
+            "po_quantity": 12.0,
+            "invoice_quantity": 24.0,
+            "delta": 12.0
+          }
+        }
+      ]
+    },
+    {
+      "scenario_id": "S-C006-vendor_mismatch",
+      "case_id": "C006",
+      "mutation": "vendor_mismatch",
+      "description": "vendor mismatch",
+      "expected_codes": [
+        "VENDOR_MISMATCH"
+      ],
+      "actual_codes": [
+        "VENDOR_MISMATCH"
+      ],
+      "passed": true,
+      "audit_trace_complete": true,
+      "violations": [
+        {
+          "code": "VENDOR_MISMATCH",
+          "severity": "critical",
+          "event_id": "C006-08-invoice_received-BAD-INV-C006",
+          "message": "event vendor V99 differs from PO vendor V02",
+          "evidence": {
+            "expected": "V02",
+            "actual": "V99"
+          }
+        }
+      ]
+    },
+    {
+      "scenario_id": "S-C006-quantity_mismatch",
+      "case_id": "C006",
+      "mutation": "quantity_mismatch",
+      "description": "quantity mismatch",
+      "expected_codes": [
+        "QUANTITY_MISMATCH"
+      ],
+      "actual_codes": [
+        "QUANTITY_MISMATCH"
+      ],
+      "passed": true,
+      "audit_trace_complete": true,
+      "violations": [
+        {
+          "code": "QUANTITY_MISMATCH",
+          "severity": "high",
+          "event_id": "C006-08-invoice_received-QTY-INV-C006",
+          "message": "invoice quantity does not match PO quantity within tolerance",
+          "evidence": {
+            "po_quantity": 12.0,
+            "invoice_quantity": 13.0,
+            "delta": 1.0
+          }
+        }
+      ]
+    },
+    {
+      "scenario_id": "S-C006-payment_before_approval",
+      "case_id": "C006",
+      "mutation": "payment_before_approval",
+      "description": "payment before approval",
+      "expected_codes": [
+        "PAYMENT_BEFORE_APPROVAL"
+      ],
+      "actual_codes": [
+        "PAYMENT_BEFORE_APPROVAL"
+      ],
+      "passed": true,
+      "audit_trace_complete": false,
+      "violations": [
+        {
+          "code": "PAYMENT_BEFORE_APPROVAL",
+          "severity": "critical",
+          "event_id": "C006-04-payment_cleared-INV-C006",
+          "message": "payment cleared before required approval",
+          "evidence": {
+            "approval_limit": 1000.0,
+            "po_amount": 1900.0
+          }
+        }
+      ]
+    },
+    {
+      "scenario_id": "S-C007-duplicate_invoice",
+      "case_id": "C007",
+      "mutation": "duplicate_invoice",
+      "description": "duplicate invoice",
+      "expected_codes": [
+        "DUPLICATE_INVOICE"
+      ],
+      "actual_codes": [
+        "DUPLICATE_INVOICE",
+        "QUANTITY_MISMATCH",
+        "VALUE_MISMATCH"
+      ],
+      "passed": true,
+      "audit_trace_complete": true,
+      "violations": [
+        {
+          "code": "DUPLICATE_INVOICE",
+          "severity": "critical",
+          "event_id": "C007-08-invoice_received-INV-C007",
+          "message": "invoice INV-C007 was seen more than once",
+          "evidence": {
+            "invoice_id": "INV-C007"
+          }
+        },
+        {
+          "code": "VALUE_MISMATCH",
+          "severity": "high",
+          "event_id": "C007-08-invoice_received-INV-C007",
+          "message": "invoice amount does not match PO amount within tolerance",
+          "evidence": {
+            "po_amount": 740.0,
+            "invoice_amount": 1480.0,
+            "delta": 740.0
+          }
+        },
+        {
+          "code": "QUANTITY_MISMATCH",
+          "severity": "high",
+          "event_id": "C007-08-invoice_received-INV-C007",
+          "message": "invoice quantity does not match PO quantity within tolerance",
+          "evidence": {
+            "po_quantity": 4.0,
+            "invoice_quantity": 8.0,
+            "delta": 4.0
+          }
+        }
+      ]
+    },
+    {
+      "scenario_id": "S-C007-vendor_mismatch",
+      "case_id": "C007",
+      "mutation": "vendor_mismatch",
+      "description": "vendor mismatch",
+      "expected_codes": [
+        "VENDOR_MISMATCH"
+      ],
+      "actual_codes": [
+        "VENDOR_MISMATCH"
+      ],
+      "passed": true,
+      "audit_trace_complete": true,
+      "violations": [
+        {
+          "code": "VENDOR_MISMATCH",
+          "severity": "critical",
+          "event_id": "C007-08-invoice_received-BAD-INV-C007",
+          "message": "event vendor V99 differs from PO vendor V03",
+          "evidence": {
+            "expected": "V03",
+            "actual": "V99"
+          }
+        }
+      ]
+    },
+    {
+      "scenario_id": "S-C007-amount_overbill",
+      "case_id": "C007",
+      "mutation": "amount_overbill",
+      "description": "amount overbill",
+      "expected_codes": [
+        "VALUE_MISMATCH"
+      ],
+      "actual_codes": [
+        "VALUE_MISMATCH"
+      ],
+      "passed": true,
+      "audit_trace_complete": true,
+      "violations": [
+        {
+          "code": "VALUE_MISMATCH",
+          "severity": "high",
+          "event_id": "C007-08-invoice_received-OVER-INV-C007",
+          "message": "invoice amount does not match PO amount within tolerance",
+          "evidence": {
+            "po_amount": 740.0,
+            "invoice_amount": 815.0,
+            "delta": 75.0
+          }
+        }
+      ]
+    },
+    {
+      "scenario_id": "S-C007-payment_while_blocked",
+      "case_id": "C007",
+      "mutation": "payment_while_blocked",
+      "description": "payment while blocked",
+      "expected_codes": [
+        "PAYMENT_WHILE_BLOCKED"
+      ],
+      "actual_codes": [
+        "PAYMENT_WHILE_BLOCKED",
+        "UNNEEDED_HOLD"
+      ],
+      "passed": true,
+      "audit_trace_complete": true,
+      "violations": [
+        {
+          "code": "UNNEEDED_HOLD",
+          "severity": "low",
+          "event_id": "C007-03-invoice_blocked-INV-C007",
+          "message": "invoice INV-C007 was held even though required evidence was already present",
+          "evidence": {
+            "invoice_id": "INV-C007"
+          }
+        },
+        {
+          "code": "PAYMENT_WHILE_BLOCKED",
+          "severity": "critical",
+          "event_id": "C007-04-payment_cleared-INV-C007",
+          "message": "payment cleared while invoice hold was still active",
+          "evidence": {
+            "blocked_invoice_ids": [
+              "INV-C007"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "scenario_id": "S-C008-duplicate_invoice",
+      "case_id": "C008",
+      "mutation": "duplicate_invoice",
+      "description": "duplicate invoice",
+      "expected_codes": [
+        "CONSIGNMENT_INVOICE",
+        "DUPLICATE_INVOICE"
+      ],
+      "actual_codes": [
+        "CONSIGNMENT_INVOICE",
+        "DUPLICATE_INVOICE"
+      ],
+      "passed": true,
+      "audit_trace_complete": true,
+      "violations": [
+        {
+          "code": "CONSIGNMENT_INVOICE",
+          "severity": "high",
+          "event_id": "C008-03-invoice_received-INV-C008",
+          "message": "consignment flow should not receive PO-level invoice",
+          "evidence": {
+            "invoice_id": "INV-C008"
+          }
+        },
+        {
+          "code": "DUPLICATE_INVOICE",
+          "severity": "critical",
+          "event_id": "C008-04-invoice_received-INV-C008",
+          "message": "invoice INV-C008 was seen more than once",
+          "evidence": {
+            "invoice_id": "INV-C008"
+          }
+        },
+        {
+          "code": "CONSIGNMENT_INVOICE",
+          "severity": "high",
+          "event_id": "C008-04-invoice_received-INV-C008",
+          "message": "consignment flow should not receive PO-level invoice",
+          "evidence": {
+            "invoice_id": "INV-C008"
+          }
+        }
+      ]
+    },
+    {
+      "scenario_id": "S-C008-vendor_mismatch",
+      "case_id": "C008",
+      "mutation": "vendor_mismatch",
+      "description": "vendor mismatch",
+      "expected_codes": [
+        "VENDOR_MISMATCH"
+      ],
+      "actual_codes": [
+        "CONSIGNMENT_INVOICE",
+        "VENDOR_MISMATCH"
+      ],
+      "passed": true,
+      "audit_trace_complete": true,
+      "violations": [
+        {
+          "code": "VENDOR_MISMATCH",
+          "severity": "critical",
+          "event_id": "C008-08-invoice_received-BAD-INV-C008",
+          "message": "event vendor V99 differs from PO vendor V04",
+          "evidence": {
+            "expected": "V04",
+            "actual": "V99"
+          }
+        },
+        {
+          "code": "CONSIGNMENT_INVOICE",
+          "severity": "high",
+          "event_id": "C008-08-invoice_received-BAD-INV-C008",
+          "message": "consignment flow should not receive PO-level invoice",
+          "evidence": {
+            "invoice_id": "BAD-INV-C008"
+          }
+        }
+      ]
+    },
+    {
+      "scenario_id": "S-C008-consignment_invoice",
+      "case_id": "C008",
+      "mutation": "consignment_invoice",
+      "description": "consignment invoice",
+      "expected_codes": [
+        "CONSIGNMENT_INVOICE"
+      ],
+      "actual_codes": [
+        "CONSIGNMENT_INVOICE"
+      ],
+      "passed": true,
+      "audit_trace_complete": true,
+      "violations": [
+        {
+          "code": "CONSIGNMENT_INVOICE",
+          "severity": "high",
+          "event_id": "C008-03-invoice_received-INV-C008",
+          "message": "consignment flow should not receive PO-level invoice",
+          "evidence": {
+            "invoice_id": "INV-C008"
+          }
+        }
+      ]
+    },
+    {
+      "scenario_id": "S-C008-consignment_duplicate_invoice",
+      "case_id": "C008",
+      "mutation": "consignment_duplicate_invoice",
+      "description": "consignment duplicate invoice",
+      "expected_codes": [
+        "CONSIGNMENT_INVOICE",
+        "DUPLICATE_INVOICE"
+      ],
+      "actual_codes": [
+        "CONSIGNMENT_INVOICE",
+        "DUPLICATE_INVOICE"
+      ],
+      "passed": true,
+      "audit_trace_complete": true,
+      "violations": [
+        {
+          "code": "CONSIGNMENT_INVOICE",
+          "severity": "high",
+          "event_id": "C008-03-invoice_received-INV-C008",
+          "message": "consignment flow should not receive PO-level invoice",
+          "evidence": {
+            "invoice_id": "INV-C008"
+          }
+        },
+        {
+          "code": "DUPLICATE_INVOICE",
+          "severity": "critical",
+          "event_id": "C008-04-invoice_received-INV-C008",
+          "message": "invoice INV-C008 was seen more than once",
+          "evidence": {
+            "invoice_id": "INV-C008"
+          }
+        },
+        {
+          "code": "CONSIGNMENT_INVOICE",
+          "severity": "high",
+          "event_id": "C008-04-invoice_received-INV-C008",
+          "message": "consignment flow should not receive PO-level invoice",
+          "evidence": {
+            "invoice_id": "INV-C008"
+          }
+        }
+      ]
+    },
+    {
+      "scenario_id": "S-C009-duplicate_invoice",
+      "case_id": "C009",
+      "mutation": "duplicate_invoice",
+      "description": "duplicate invoice",
+      "expected_codes": [
+        "DUPLICATE_INVOICE"
+      ],
+      "actual_codes": [
+        "DUPLICATE_INVOICE",
+        "QUANTITY_MISMATCH",
+        "VALUE_MISMATCH"
+      ],
+      "passed": true,
+      "audit_trace_complete": true,
+      "violations": [
+        {
+          "code": "DUPLICATE_INVOICE",
+          "severity": "critical",
+          "event_id": "C009-08-invoice_received-INV-C009",
+          "message": "invoice INV-C009 was seen more than once",
+          "evidence": {
+            "invoice_id": "INV-C009"
+          }
+        },
+        {
+          "code": "VALUE_MISMATCH",
+          "severity": "high",
+          "event_id": "C009-08-invoice_received-INV-C009",
+          "message": "invoice amount does not match PO amount within tolerance",
+          "evidence": {
+            "po_amount": 1450.0,
+            "invoice_amount": 2900.0,
+            "delta": 1450.0
+          }
+        },
+        {
+          "code": "QUANTITY_MISMATCH",
+          "severity": "high",
+          "event_id": "C009-08-invoice_received-INV-C009",
+          "message": "invoice quantity does not match PO quantity within tolerance",
+          "evidence": {
+            "po_quantity": 10.0,
+            "invoice_quantity": 20.0,
+            "delta": 10.0
+          }
+        }
+      ]
+    },
+    {
+      "scenario_id": "S-C009-vendor_mismatch",
+      "case_id": "C009",
+      "mutation": "vendor_mismatch",
+      "description": "vendor mismatch",
+      "expected_codes": [
+        "VENDOR_MISMATCH"
+      ],
+      "actual_codes": [
+        "VENDOR_MISMATCH"
+      ],
+      "passed": true,
+      "audit_trace_complete": true,
+      "violations": [
+        {
+          "code": "VENDOR_MISMATCH",
+          "severity": "critical",
+          "event_id": "C009-08-invoice_received-BAD-INV-C009",
+          "message": "event vendor V99 differs from PO vendor V01",
+          "evidence": {
+            "expected": "V01",
+            "actual": "V99"
+          }
+        }
+      ]
+    },
+    {
+      "scenario_id": "S-C009-amount_overbill",
+      "case_id": "C009",
+      "mutation": "amount_overbill",
+      "description": "amount overbill",
+      "expected_codes": [
+        "VALUE_MISMATCH"
+      ],
+      "actual_codes": [
+        "VALUE_MISMATCH"
+      ],
+      "passed": true,
+      "audit_trace_complete": true,
+      "violations": [
+        {
+          "code": "VALUE_MISMATCH",
+          "severity": "high",
+          "event_id": "C009-08-invoice_received-OVER-INV-C009",
+          "message": "invoice amount does not match PO amount within tolerance",
+          "evidence": {
+            "po_amount": 1450.0,
+            "invoice_amount": 1525.0,
+            "delta": 75.0
+          }
+        }
+      ]
+    },
+    {
+      "scenario_id": "S-C009-payment_before_gr",
+      "case_id": "C009",
+      "mutation": "payment_before_gr",
+      "description": "payment before gr",
+      "expected_codes": [
+        "PAYMENT_BEFORE_GR"
+      ],
+      "actual_codes": [
+        "PAYMENT_BEFORE_APPROVAL",
+        "PAYMENT_BEFORE_GR"
+      ],
+      "passed": true,
+      "audit_trace_complete": true,
+      "violations": [
+        {
+          "code": "PAYMENT_BEFORE_GR",
+          "severity": "critical",
+          "event_id": "C009-00-payment_cleared-EARLY-INV-C009",
+          "message": "payment cleared before required goods receipt",
+          "evidence": {
+            "received_amount": 0.0
+          }
+        },
+        {
+          "code": "PAYMENT_BEFORE_APPROVAL",
+          "severity": "critical",
+          "event_id": "C009-00-payment_cleared-EARLY-INV-C009",
+          "message": "payment cleared before required approval",
+          "evidence": {
+            "approval_limit": 1000.0,
+            "po_amount": 1450.0
+          }
+        }
+      ]
+    },
+    {
+      "scenario_id": "S-C010-duplicate_invoice",
+      "case_id": "C010",
+      "mutation": "duplicate_invoice",
+      "description": "duplicate invoice",
+      "expected_codes": [
+        "DUPLICATE_INVOICE"
+      ],
+      "actual_codes": [
+        "DUPLICATE_INVOICE",
+        "QUANTITY_MISMATCH",
+        "VALUE_MISMATCH"
+      ],
+      "passed": true,
+      "audit_trace_complete": true,
+      "violations": [
+        {
+          "code": "DUPLICATE_INVOICE",
+          "severity": "critical",
+          "event_id": "C010-08-invoice_received-INV-C010",
+          "message": "invoice INV-C010 was seen more than once",
+          "evidence": {
+            "invoice_id": "INV-C010"
+          }
+        },
+        {
+          "code": "VALUE_MISMATCH",
+          "severity": "high",
+          "event_id": "C010-08-invoice_received-INV-C010",
+          "message": "invoice amount does not match PO amount within tolerance",
+          "evidence": {
+            "po_amount": 2000.0,
+            "invoice_amount": 4000.0,
+            "delta": 2000.0
+          }
+        },
+        {
+          "code": "QUANTITY_MISMATCH",
+          "severity": "high",
+          "event_id": "C010-08-invoice_received-INV-C010",
+          "message": "invoice quantity does not match PO quantity within tolerance",
+          "evidence": {
+            "po_quantity": 12.0,
+            "invoice_quantity": 24.0,
+            "delta": 12.0
+          }
+        }
+      ]
+    },
+    {
+      "scenario_id": "S-C010-vendor_mismatch",
+      "case_id": "C010",
+      "mutation": "vendor_mismatch",
+      "description": "vendor mismatch",
+      "expected_codes": [
+        "VENDOR_MISMATCH"
+      ],
+      "actual_codes": [
+        "VENDOR_MISMATCH"
+      ],
+      "passed": true,
+      "audit_trace_complete": true,
+      "violations": [
+        {
+          "code": "VENDOR_MISMATCH",
+          "severity": "critical",
+          "event_id": "C010-08-invoice_received-BAD-INV-C010",
+          "message": "event vendor V99 differs from PO vendor V02",
+          "evidence": {
+            "expected": "V02",
+            "actual": "V99"
+          }
+        }
+      ]
+    },
+    {
+      "scenario_id": "S-C010-quantity_mismatch",
+      "case_id": "C010",
+      "mutation": "quantity_mismatch",
+      "description": "quantity mismatch",
+      "expected_codes": [
+        "QUANTITY_MISMATCH"
+      ],
+      "actual_codes": [
+        "QUANTITY_MISMATCH"
+      ],
+      "passed": true,
+      "audit_trace_complete": true,
+      "violations": [
+        {
+          "code": "QUANTITY_MISMATCH",
+          "severity": "high",
+          "event_id": "C010-08-invoice_received-QTY-INV-C010",
+          "message": "invoice quantity does not match PO quantity within tolerance",
+          "evidence": {
+            "po_quantity": 12.0,
+            "invoice_quantity": 13.0,
+            "delta": 1.0
+          }
+        }
+      ]
+    },
+    {
+      "scenario_id": "S-C010-payment_before_approval",
+      "case_id": "C010",
+      "mutation": "payment_before_approval",
+      "description": "payment before approval",
+      "expected_codes": [
+        "PAYMENT_BEFORE_APPROVAL"
+      ],
+      "actual_codes": [
+        "PAYMENT_BEFORE_APPROVAL"
+      ],
+      "passed": true,
+      "audit_trace_complete": false,
+      "violations": [
+        {
+          "code": "PAYMENT_BEFORE_APPROVAL",
+          "severity": "critical",
+          "event_id": "C010-04-payment_cleared-INV-C010",
+          "message": "payment cleared before required approval",
+          "evidence": {
+            "approval_limit": 1000.0,
+            "po_amount": 2000.0
+          }
+        }
+      ]
+    },
+    {
+      "scenario_id": "S-C011-duplicate_invoice",
+      "case_id": "C011",
+      "mutation": "duplicate_invoice",
+      "description": "duplicate invoice",
+      "expected_codes": [
+        "DUPLICATE_INVOICE"
+      ],
+      "actual_codes": [
+        "DUPLICATE_INVOICE",
+        "QUANTITY_MISMATCH",
+        "VALUE_MISMATCH"
+      ],
+      "passed": true,
+      "audit_trace_complete": true,
+      "violations": [
+        {
+          "code": "DUPLICATE_INVOICE",
+          "severity": "critical",
+          "event_id": "C011-08-invoice_received-INV-C011",
+          "message": "invoice INV-C011 was seen more than once",
+          "evidence": {
+            "invoice_id": "INV-C011"
+          }
+        },
+        {
+          "code": "VALUE_MISMATCH",
+          "severity": "high",
+          "event_id": "C011-08-invoice_received-INV-C011",
+          "message": "invoice amount does not match PO amount within tolerance",
+          "evidence": {
+            "po_amount": 840.0,
+            "invoice_amount": 1680.0,
+            "delta": 840.0
+          }
+        },
+        {
+          "code": "QUANTITY_MISMATCH",
+          "severity": "high",
+          "event_id": "C011-08-invoice_received-INV-C011",
+          "message": "invoice quantity does not match PO quantity within tolerance",
+          "evidence": {
+            "po_quantity": 4.0,
+            "invoice_quantity": 8.0,
+            "delta": 4.0
+          }
+        }
+      ]
+    },
+    {
+      "scenario_id": "S-C011-vendor_mismatch",
+      "case_id": "C011",
+      "mutation": "vendor_mismatch",
+      "description": "vendor mismatch",
+      "expected_codes": [
+        "VENDOR_MISMATCH"
+      ],
+      "actual_codes": [
+        "VENDOR_MISMATCH"
+      ],
+      "passed": true,
+      "audit_trace_complete": true,
+      "violations": [
+        {
+          "code": "VENDOR_MISMATCH",
+          "severity": "critical",
+          "event_id": "C011-08-invoice_received-BAD-INV-C011",
+          "message": "event vendor V99 differs from PO vendor V03",
+          "evidence": {
+            "expected": "V03",
+            "actual": "V99"
+          }
+        }
+      ]
+    },
+    {
+      "scenario_id": "S-C011-amount_overbill",
+      "case_id": "C011",
+      "mutation": "amount_overbill",
+      "description": "amount overbill",
+      "expected_codes": [
+        "VALUE_MISMATCH"
+      ],
+      "actual_codes": [
+        "VALUE_MISMATCH"
+      ],
+      "passed": true,
+      "audit_trace_complete": true,
+      "violations": [
+        {
+          "code": "VALUE_MISMATCH",
+          "severity": "high",
+          "event_id": "C011-08-invoice_received-OVER-INV-C011",
+          "message": "invoice amount does not match PO amount within tolerance",
+          "evidence": {
+            "po_amount": 840.0,
+            "invoice_amount": 915.0,
+            "delta": 75.0
+          }
+        }
+      ]
+    },
+    {
+      "scenario_id": "S-C011-payment_while_blocked",
+      "case_id": "C011",
+      "mutation": "payment_while_blocked",
+      "description": "payment while blocked",
+      "expected_codes": [
+        "PAYMENT_WHILE_BLOCKED"
+      ],
+      "actual_codes": [
+        "PAYMENT_WHILE_BLOCKED",
+        "UNNEEDED_HOLD"
+      ],
+      "passed": true,
+      "audit_trace_complete": true,
+      "violations": [
+        {
+          "code": "UNNEEDED_HOLD",
+          "severity": "low",
+          "event_id": "C011-03-invoice_blocked-INV-C011",
+          "message": "invoice INV-C011 was held even though required evidence was already present",
+          "evidence": {
+            "invoice_id": "INV-C011"
+          }
+        },
+        {
+          "code": "PAYMENT_WHILE_BLOCKED",
+          "severity": "critical",
+          "event_id": "C011-04-payment_cleared-INV-C011",
+          "message": "payment cleared while invoice hold was still active",
+          "evidence": {
+            "blocked_invoice_ids": [
+              "INV-C011"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "scenario_id": "S-C012-duplicate_invoice",
+      "case_id": "C012",
+      "mutation": "duplicate_invoice",
+      "description": "duplicate invoice",
+      "expected_codes": [
+        "CONSIGNMENT_INVOICE",
+        "DUPLICATE_INVOICE"
+      ],
+      "actual_codes": [
+        "CONSIGNMENT_INVOICE",
+        "DUPLICATE_INVOICE"
+      ],
+      "passed": true,
+      "audit_trace_complete": true,
+      "violations": [
+        {
+          "code": "CONSIGNMENT_INVOICE",
+          "severity": "high",
+          "event_id": "C012-03-invoice_received-INV-C012",
+          "message": "consignment flow should not receive PO-level invoice",
+          "evidence": {
+            "invoice_id": "INV-C012"
+          }
+        },
+        {
+          "code": "DUPLICATE_INVOICE",
+          "severity": "critical",
+          "event_id": "C012-04-invoice_received-INV-C012",
+          "message": "invoice INV-C012 was seen more than once",
+          "evidence": {
+            "invoice_id": "INV-C012"
+          }
+        },
+        {
+          "code": "CONSIGNMENT_INVOICE",
+          "severity": "high",
+          "event_id": "C012-04-invoice_received-INV-C012",
+          "message": "consignment flow should not receive PO-level invoice",
+          "evidence": {
+            "invoice_id": "INV-C012"
+          }
+        }
+      ]
+    },
+    {
+      "scenario_id": "S-C012-vendor_mismatch",
+      "case_id": "C012",
+      "mutation": "vendor_mismatch",
+      "description": "vendor mismatch",
+      "expected_codes": [
+        "VENDOR_MISMATCH"
+      ],
+      "actual_codes": [
+        "CONSIGNMENT_INVOICE",
+        "VENDOR_MISMATCH"
+      ],
+      "passed": true,
+      "audit_trace_complete": true,
+      "violations": [
+        {
+          "code": "VENDOR_MISMATCH",
+          "severity": "critical",
+          "event_id": "C012-08-invoice_received-BAD-INV-C012",
+          "message": "event vendor V99 differs from PO vendor V04",
+          "evidence": {
+            "expected": "V04",
+            "actual": "V99"
+          }
+        },
+        {
+          "code": "CONSIGNMENT_INVOICE",
+          "severity": "high",
+          "event_id": "C012-08-invoice_received-BAD-INV-C012",
+          "message": "consignment flow should not receive PO-level invoice",
+          "evidence": {
+            "invoice_id": "BAD-INV-C012"
+          }
+        }
+      ]
+    },
+    {
+      "scenario_id": "S-C012-consignment_invoice",
+      "case_id": "C012",
+      "mutation": "consignment_invoice",
+      "description": "consignment invoice",
+      "expected_codes": [
+        "CONSIGNMENT_INVOICE"
+      ],
+      "actual_codes": [
+        "CONSIGNMENT_INVOICE"
+      ],
+      "passed": true,
+      "audit_trace_complete": true,
+      "violations": [
+        {
+          "code": "CONSIGNMENT_INVOICE",
+          "severity": "high",
+          "event_id": "C012-03-invoice_received-INV-C012",
+          "message": "consignment flow should not receive PO-level invoice",
+          "evidence": {
+            "invoice_id": "INV-C012"
+          }
+        }
+      ]
+    },
+    {
+      "scenario_id": "S-C012-consignment_duplicate_invoice",
+      "case_id": "C012",
+      "mutation": "consignment_duplicate_invoice",
+      "description": "consignment duplicate invoice",
+      "expected_codes": [
+        "CONSIGNMENT_INVOICE",
+        "DUPLICATE_INVOICE"
+      ],
+      "actual_codes": [
+        "CONSIGNMENT_INVOICE",
+        "DUPLICATE_INVOICE"
+      ],
+      "passed": true,
+      "audit_trace_complete": true,
+      "violations": [
+        {
+          "code": "CONSIGNMENT_INVOICE",
+          "severity": "high",
+          "event_id": "C012-03-invoice_received-INV-C012",
+          "message": "consignment flow should not receive PO-level invoice",
+          "evidence": {
+            "invoice_id": "INV-C012"
+          }
+        },
+        {
+          "code": "DUPLICATE_INVOICE",
+          "severity": "critical",
+          "event_id": "C012-04-invoice_received-INV-C012",
+          "message": "invoice INV-C012 was seen more than once",
+          "evidence": {
+            "invoice_id": "INV-C012"
+          }
+        },
+        {
+          "code": "CONSIGNMENT_INVOICE",
+          "severity": "high",
+          "event_id": "C012-04-invoice_received-INV-C012",
+          "message": "consignment flow should not receive PO-level invoice",
+          "evidence": {
+            "invoice_id": "INV-C012"
+          }
+        }
+      ]
+    }
+  ],
+  "failure_queue": [
+    {
+      "scenario_id": "S-C001-duplicate_invoice",
+      "case_id": "C001",
+      "mutation": "duplicate_invoice",
+      "code": "DUPLICATE_INVOICE",
+      "severity": "critical",
+      "event_id": "C001-08-invoice_received-INV-C001",
+      "message": "invoice INV-C001 was seen more than once",
+      "evidence": {
+        "invoice_id": "INV-C001"
+      }
+    },
+    {
+      "scenario_id": "S-C001-payment_before_gr",
+      "case_id": "C001",
+      "mutation": "payment_before_gr",
+      "code": "PAYMENT_BEFORE_APPROVAL",
+      "severity": "critical",
+      "event_id": "C001-00-payment_cleared-EARLY-INV-C001",
+      "message": "payment cleared before required approval",
+      "evidence": {
+        "approval_limit": 1000.0,
+        "po_amount": 1250.0
+      }
+    },
+    {
+      "scenario_id": "S-C001-payment_before_gr",
+      "case_id": "C001",
+      "mutation": "payment_before_gr",
+      "code": "PAYMENT_BEFORE_GR",
+      "severity": "critical",
+      "event_id": "C001-00-payment_cleared-EARLY-INV-C001",
+      "message": "payment cleared before required goods receipt",
+      "evidence": {
+        "received_amount": 0.0
+      }
+    },
+    {
+      "scenario_id": "S-C001-vendor_mismatch",
+      "case_id": "C001",
+      "mutation": "vendor_mismatch",
+      "code": "VENDOR_MISMATCH",
+      "severity": "critical",
+      "event_id": "C001-08-invoice_received-BAD-INV-C001",
+      "message": "event vendor V99 differs from PO vendor V01",
+      "evidence": {
+        "expected": "V01",
+        "actual": "V99"
+      }
+    },
+    {
+      "scenario_id": "S-C002-duplicate_invoice",
+      "case_id": "C002",
+      "mutation": "duplicate_invoice",
+      "code": "DUPLICATE_INVOICE",
+      "severity": "critical",
+      "event_id": "C002-08-invoice_received-INV-C002",
+      "message": "invoice INV-C002 was seen more than once",
+      "evidence": {
+        "invoice_id": "INV-C002"
+      }
+    },
+    {
+      "scenario_id": "S-C002-payment_before_approval",
+      "case_id": "C002",
+      "mutation": "payment_before_approval",
+      "code": "PAYMENT_BEFORE_APPROVAL",
+      "severity": "critical",
+      "event_id": "C002-04-payment_cleared-INV-C002",
+      "message": "payment cleared before required approval",
+      "evidence": {
+        "approval_limit": 1000.0,
+        "po_amount": 1800.0
+      }
+    },
+    {
+      "scenario_id": "S-C002-vendor_mismatch",
+      "case_id": "C002",
+      "mutation": "vendor_mismatch",
+      "code": "VENDOR_MISMATCH",
+      "severity": "critical",
+      "event_id": "C002-08-invoice_received-BAD-INV-C002",
+      "message": "event vendor V99 differs from PO vendor V02",
+      "evidence": {
+        "expected": "V02",
+        "actual": "V99"
+      }
+    },
+    {
+      "scenario_id": "S-C003-duplicate_invoice",
+      "case_id": "C003",
+      "mutation": "duplicate_invoice",
+      "code": "DUPLICATE_INVOICE",
+      "severity": "critical",
+      "event_id": "C003-08-invoice_received-INV-C003",
+      "message": "invoice INV-C003 was seen more than once",
+      "evidence": {
+        "invoice_id": "INV-C003"
+      }
+    },
+    {
+      "scenario_id": "S-C003-payment_while_blocked",
+      "case_id": "C003",
+      "mutation": "payment_while_blocked",
+      "code": "PAYMENT_WHILE_BLOCKED",
+      "severity": "critical",
+      "event_id": "C003-04-payment_cleared-INV-C003",
+      "message": "payment cleared while invoice hold was still active",
+      "evidence": {
+        "blocked_invoice_ids": [
+          "INV-C003"
+        ]
+      }
+    },
+    {
+      "scenario_id": "S-C003-vendor_mismatch",
+      "case_id": "C003",
+      "mutation": "vendor_mismatch",
+      "code": "VENDOR_MISMATCH",
+      "severity": "critical",
+      "event_id": "C003-08-invoice_received-BAD-INV-C003",
+      "message": "event vendor V99 differs from PO vendor V03",
+      "evidence": {
+        "expected": "V03",
+        "actual": "V99"
+      }
+    },
+    {
+      "scenario_id": "S-C004-consignment_duplicate_invoice",
+      "case_id": "C004",
+      "mutation": "consignment_duplicate_invoice",
+      "code": "DUPLICATE_INVOICE",
+      "severity": "critical",
+      "event_id": "C004-04-invoice_received-INV-C004",
+      "message": "invoice INV-C004 was seen more than once",
+      "evidence": {
+        "invoice_id": "INV-C004"
+      }
+    },
+    {
+      "scenario_id": "S-C004-duplicate_invoice",
+      "case_id": "C004",
+      "mutation": "duplicate_invoice",
+      "code": "DUPLICATE_INVOICE",
+      "severity": "critical",
+      "event_id": "C004-04-invoice_received-INV-C004",
+      "message": "invoice INV-C004 was seen more than once",
+      "evidence": {
+        "invoice_id": "INV-C004"
+      }
+    },
+    {
+      "scenario_id": "S-C004-vendor_mismatch",
+      "case_id": "C004",
+      "mutation": "vendor_mismatch",
+      "code": "VENDOR_MISMATCH",
+      "severity": "critical",
+      "event_id": "C004-08-invoice_received-BAD-INV-C004",
+      "message": "event vendor V99 differs from PO vendor V04",
+      "evidence": {
+        "expected": "V04",
+        "actual": "V99"
+      }
+    },
+    {
+      "scenario_id": "S-C005-duplicate_invoice",
+      "case_id": "C005",
+      "mutation": "duplicate_invoice",
+      "code": "DUPLICATE_INVOICE",
+      "severity": "critical",
+      "event_id": "C005-08-invoice_received-INV-C005",
+      "message": "invoice INV-C005 was seen more than once",
+      "evidence": {
+        "invoice_id": "INV-C005"
+      }
+    },
+    {
+      "scenario_id": "S-C005-payment_before_gr",
+      "case_id": "C005",
+      "mutation": "payment_before_gr",
+      "code": "PAYMENT_BEFORE_APPROVAL",
+      "severity": "critical",
+      "event_id": "C005-00-payment_cleared-EARLY-INV-C005",
+      "message": "payment cleared before required approval",
+      "evidence": {
+        "approval_limit": 1000.0,
+        "po_amount": 1350.0
+      }
+    },
+    {
+      "scenario_id": "S-C005-payment_before_gr",
+      "case_id": "C005",
+      "mutation": "payment_before_gr",
+      "code": "PAYMENT_BEFORE_GR",
+      "severity": "critical",
+      "event_id": "C005-00-payment_cleared-EARLY-INV-C005",
+      "message": "payment cleared before required goods receipt",
+      "evidence": {
+        "received_amount": 0.0
+      }
+    },
+    {
+      "scenario_id": "S-C005-vendor_mismatch",
+      "case_id": "C005",
+      "mutation": "vendor_mismatch",
+      "code": "VENDOR_MISMATCH",
+      "severity": "critical",
+      "event_id": "C005-08-invoice_received-BAD-INV-C005",
+      "message": "event vendor V99 differs from PO vendor V01",
+      "evidence": {
+        "expected": "V01",
+        "actual": "V99"
+      }
+    },
+    {
+      "scenario_id": "S-C006-duplicate_invoice",
+      "case_id": "C006",
+      "mutation": "duplicate_invoice",
+      "code": "DUPLICATE_INVOICE",
+      "severity": "critical",
+      "event_id": "C006-08-invoice_received-INV-C006",
+      "message": "invoice INV-C006 was seen more than once",
+      "evidence": {
+        "invoice_id": "INV-C006"
+      }
+    },
+    {
+      "scenario_id": "S-C006-payment_before_approval",
+      "case_id": "C006",
+      "mutation": "payment_before_approval",
+      "code": "PAYMENT_BEFORE_APPROVAL",
+      "severity": "critical",
+      "event_id": "C006-04-payment_cleared-INV-C006",
+      "message": "payment cleared before required approval",
+      "evidence": {
+        "approval_limit": 1000.0,
+        "po_amount": 1900.0
+      }
+    },
+    {
+      "scenario_id": "S-C006-vendor_mismatch",
+      "case_id": "C006",
+      "mutation": "vendor_mismatch",
+      "code": "VENDOR_MISMATCH",
+      "severity": "critical",
+      "event_id": "C006-08-invoice_received-BAD-INV-C006",
+      "message": "event vendor V99 differs from PO vendor V02",
+      "evidence": {
+        "expected": "V02",
+        "actual": "V99"
+      }
+    },
+    {
+      "scenario_id": "S-C007-duplicate_invoice",
+      "case_id": "C007",
+      "mutation": "duplicate_invoice",
+      "code": "DUPLICATE_INVOICE",
+      "severity": "critical",
+      "event_id": "C007-08-invoice_received-INV-C007",
+      "message": "invoice INV-C007 was seen more than once",
+      "evidence": {
+        "invoice_id": "INV-C007"
+      }
+    },
+    {
+      "scenario_id": "S-C007-payment_while_blocked",
+      "case_id": "C007",
+      "mutation": "payment_while_blocked",
+      "code": "PAYMENT_WHILE_BLOCKED",
+      "severity": "critical",
+      "event_id": "C007-04-payment_cleared-INV-C007",
+      "message": "payment cleared while invoice hold was still active",
+      "evidence": {
+        "blocked_invoice_ids": [
+          "INV-C007"
+        ]
+      }
+    },
+    {
+      "scenario_id": "S-C007-vendor_mismatch",
+      "case_id": "C007",
+      "mutation": "vendor_mismatch",
+      "code": "VENDOR_MISMATCH",
+      "severity": "critical",
+      "event_id": "C007-08-invoice_received-BAD-INV-C007",
+      "message": "event vendor V99 differs from PO vendor V03",
+      "evidence": {
+        "expected": "V03",
+        "actual": "V99"
+      }
+    },
+    {
+      "scenario_id": "S-C008-consignment_duplicate_invoice",
+      "case_id": "C008",
+      "mutation": "consignment_duplicate_invoice",
+      "code": "DUPLICATE_INVOICE",
+      "severity": "critical",
+      "event_id": "C008-04-invoice_received-INV-C008",
+      "message": "invoice INV-C008 was seen more than once",
+      "evidence": {
+        "invoice_id": "INV-C008"
+      }
+    },
+    {
+      "scenario_id": "S-C008-duplicate_invoice",
+      "case_id": "C008",
+      "mutation": "duplicate_invoice",
+      "code": "DUPLICATE_INVOICE",
+      "severity": "critical",
+      "event_id": "C008-04-invoice_received-INV-C008",
+      "message": "invoice INV-C008 was seen more than once",
+      "evidence": {
+        "invoice_id": "INV-C008"
+      }
+    },
+    {
+      "scenario_id": "S-C008-vendor_mismatch",
+      "case_id": "C008",
+      "mutation": "vendor_mismatch",
+      "code": "VENDOR_MISMATCH",
+      "severity": "critical",
+      "event_id": "C008-08-invoice_received-BAD-INV-C008",
+      "message": "event vendor V99 differs from PO vendor V04",
+      "evidence": {
+        "expected": "V04",
+        "actual": "V99"
+      }
+    },
+    {
+      "scenario_id": "S-C009-duplicate_invoice",
+      "case_id": "C009",
+      "mutation": "duplicate_invoice",
+      "code": "DUPLICATE_INVOICE",
+      "severity": "critical",
+      "event_id": "C009-08-invoice_received-INV-C009",
+      "message": "invoice INV-C009 was seen more than once",
+      "evidence": {
+        "invoice_id": "INV-C009"
+      }
+    },
+    {
+      "scenario_id": "S-C009-payment_before_gr",
+      "case_id": "C009",
+      "mutation": "payment_before_gr",
+      "code": "PAYMENT_BEFORE_APPROVAL",
+      "severity": "critical",
+      "event_id": "C009-00-payment_cleared-EARLY-INV-C009",
+      "message": "payment cleared before required approval",
+      "evidence": {
+        "approval_limit": 1000.0,
+        "po_amount": 1450.0
+      }
+    },
+    {
+      "scenario_id": "S-C009-payment_before_gr",
+      "case_id": "C009",
+      "mutation": "payment_before_gr",
+      "code": "PAYMENT_BEFORE_GR",
+      "severity": "critical",
+      "event_id": "C009-00-payment_cleared-EARLY-INV-C009",
+      "message": "payment cleared before required goods receipt",
+      "evidence": {
+        "received_amount": 0.0
+      }
+    },
+    {
+      "scenario_id": "S-C009-vendor_mismatch",
+      "case_id": "C009",
+      "mutation": "vendor_mismatch",
+      "code": "VENDOR_MISMATCH",
+      "severity": "critical",
+      "event_id": "C009-08-invoice_received-BAD-INV-C009",
+      "message": "event vendor V99 differs from PO vendor V01",
+      "evidence": {
+        "expected": "V01",
+        "actual": "V99"
+      }
+    },
+    {
+      "scenario_id": "S-C010-duplicate_invoice",
+      "case_id": "C010",
+      "mutation": "duplicate_invoice",
+      "code": "DUPLICATE_INVOICE",
+      "severity": "critical",
+      "event_id": "C010-08-invoice_received-INV-C010",
+      "message": "invoice INV-C010 was seen more than once",
+      "evidence": {
+        "invoice_id": "INV-C010"
+      }
+    },
+    {
+      "scenario_id": "S-C010-payment_before_approval",
+      "case_id": "C010",
+      "mutation": "payment_before_approval",
+      "code": "PAYMENT_BEFORE_APPROVAL",
+      "severity": "critical",
+      "event_id": "C010-04-payment_cleared-INV-C010",
+      "message": "payment cleared before required approval",
+      "evidence": {
+        "approval_limit": 1000.0,
+        "po_amount": 2000.0
+      }
+    },
+    {
+      "scenario_id": "S-C010-vendor_mismatch",
+      "case_id": "C010",
+      "mutation": "vendor_mismatch",
+      "code": "VENDOR_MISMATCH",
+      "severity": "critical",
+      "event_id": "C010-08-invoice_received-BAD-INV-C010",
+      "message": "event vendor V99 differs from PO vendor V02",
+      "evidence": {
+        "expected": "V02",
+        "actual": "V99"
+      }
+    },
+    {
+      "scenario_id": "S-C011-duplicate_invoice",
+      "case_id": "C011",
+      "mutation": "duplicate_invoice",
+      "code": "DUPLICATE_INVOICE",
+      "severity": "critical",
+      "event_id": "C011-08-invoice_received-INV-C011",
+      "message": "invoice INV-C011 was seen more than once",
+      "evidence": {
+        "invoice_id": "INV-C011"
+      }
+    },
+    {
+      "scenario_id": "S-C011-payment_while_blocked",
+      "case_id": "C011",
+      "mutation": "payment_while_blocked",
+      "code": "PAYMENT_WHILE_BLOCKED",
+      "severity": "critical",
+      "event_id": "C011-04-payment_cleared-INV-C011",
+      "message": "payment cleared while invoice hold was still active",
+      "evidence": {
+        "blocked_invoice_ids": [
+          "INV-C011"
+        ]
+      }
+    },
+    {
+      "scenario_id": "S-C011-vendor_mismatch",
+      "case_id": "C011",
+      "mutation": "vendor_mismatch",
+      "code": "VENDOR_MISMATCH",
+      "severity": "critical",
+      "event_id": "C011-08-invoice_received-BAD-INV-C011",
+      "message": "event vendor V99 differs from PO vendor V03",
+      "evidence": {
+        "expected": "V03",
+        "actual": "V99"
+      }
+    },
+    {
+      "scenario_id": "S-C012-consignment_duplicate_invoice",
+      "case_id": "C012",
+      "mutation": "consignment_duplicate_invoice",
+      "code": "DUPLICATE_INVOICE",
+      "severity": "critical",
+      "event_id": "C012-04-invoice_received-INV-C012",
+      "message": "invoice INV-C012 was seen more than once",
+      "evidence": {
+        "invoice_id": "INV-C012"
+      }
+    },
+    {
+      "scenario_id": "S-C012-duplicate_invoice",
+      "case_id": "C012",
+      "mutation": "duplicate_invoice",
+      "code": "DUPLICATE_INVOICE",
+      "severity": "critical",
+      "event_id": "C012-04-invoice_received-INV-C012",
+      "message": "invoice INV-C012 was seen more than once",
+      "evidence": {
+        "invoice_id": "INV-C012"
+      }
+    },
+    {
+      "scenario_id": "S-C012-vendor_mismatch",
+      "case_id": "C012",
+      "mutation": "vendor_mismatch",
+      "code": "VENDOR_MISMATCH",
+      "severity": "critical",
+      "event_id": "C012-08-invoice_received-BAD-INV-C012",
+      "message": "event vendor V99 differs from PO vendor V04",
+      "evidence": {
+        "expected": "V04",
+        "actual": "V99"
+      }
+    },
+    {
+      "scenario_id": "S-C001-amount_overbill",
+      "case_id": "C001",
+      "mutation": "amount_overbill",
+      "code": "VALUE_MISMATCH",
+      "severity": "high",
+      "event_id": "C001-08-invoice_received-OVER-INV-C001",
+      "message": "invoice amount does not match PO amount within tolerance",
+      "evidence": {
+        "po_amount": 1250.0,
+        "invoice_amount": 1325.0,
+        "delta": 75.0
+      }
+    },
+    {
+      "scenario_id": "S-C001-duplicate_invoice",
+      "case_id": "C001",
+      "mutation": "duplicate_invoice",
+      "code": "QUANTITY_MISMATCH",
+      "severity": "high",
+      "event_id": "C001-08-invoice_received-INV-C001",
+      "message": "invoice quantity does not match PO quantity within tolerance",
+      "evidence": {
+        "po_quantity": 10.0,
+        "invoice_quantity": 20.0,
+        "delta": 10.0
+      }
+    },
+    {
+      "scenario_id": "S-C001-duplicate_invoice",
+      "case_id": "C001",
+      "mutation": "duplicate_invoice",
+      "code": "VALUE_MISMATCH",
+      "severity": "high",
+      "event_id": "C001-08-invoice_received-INV-C001",
+      "message": "invoice amount does not match PO amount within tolerance",
+      "evidence": {
+        "po_amount": 1250.0,
+        "invoice_amount": 2500.0,
+        "delta": 1250.0
+      }
+    },
+    {
+      "scenario_id": "S-C002-duplicate_invoice",
+      "case_id": "C002",
+      "mutation": "duplicate_invoice",
+      "code": "QUANTITY_MISMATCH",
+      "severity": "high",
+      "event_id": "C002-08-invoice_received-INV-C002",
+      "message": "invoice quantity does not match PO quantity within tolerance",
+      "evidence": {
+        "po_quantity": 12.0,
+        "invoice_quantity": 24.0,
+        "delta": 12.0
+      }
+    },
+    {
+      "scenario_id": "S-C002-duplicate_invoice",
+      "case_id": "C002",
+      "mutation": "duplicate_invoice",
+      "code": "VALUE_MISMATCH",
+      "severity": "high",
+      "event_id": "C002-08-invoice_received-INV-C002",
+      "message": "invoice amount does not match PO amount within tolerance",
+      "evidence": {
+        "po_amount": 1800.0,
+        "invoice_amount": 3600.0,
+        "delta": 1800.0
+      }
+    },
+    {
+      "scenario_id": "S-C002-quantity_mismatch",
+      "case_id": "C002",
+      "mutation": "quantity_mismatch",
+      "code": "QUANTITY_MISMATCH",
+      "severity": "high",
+      "event_id": "C002-08-invoice_received-QTY-INV-C002",
+      "message": "invoice quantity does not match PO quantity within tolerance",
+      "evidence": {
+        "po_quantity": 12.0,
+        "invoice_quantity": 13.0,
+        "delta": 1.0
+      }
+    },
+    {
+      "scenario_id": "S-C003-amount_overbill",
+      "case_id": "C003",
+      "mutation": "amount_overbill",
+      "code": "VALUE_MISMATCH",
+      "severity": "high",
+      "event_id": "C003-08-invoice_received-OVER-INV-C003",
+      "message": "invoice amount does not match PO amount within tolerance",
+      "evidence": {
+        "po_amount": 640.0,
+        "invoice_amount": 715.0,
+        "delta": 75.0
+      }
+    },
+    {
+      "scenario_id": "S-C003-duplicate_invoice",
+      "case_id": "C003",
+      "mutation": "duplicate_invoice",
+      "code": "QUANTITY_MISMATCH",
+      "severity": "high",
+      "event_id": "C003-08-invoice_received-INV-C003",
+      "message": "invoice quantity does not match PO quantity within tolerance",
+      "evidence": {
+        "po_quantity": 4.0,
+        "invoice_quantity": 8.0,
+        "delta": 4.0
+      }
+    },
+    {
+      "scenario_id": "S-C003-duplicate_invoice",
+      "case_id": "C003",
+      "mutation": "duplicate_invoice",
+      "code": "VALUE_MISMATCH",
+      "severity": "high",
+      "event_id": "C003-08-invoice_received-INV-C003",
+      "message": "invoice amount does not match PO amount within tolerance",
+      "evidence": {
+        "po_amount": 640.0,
+        "invoice_amount": 1280.0,
+        "delta": 640.0
+      }
+    },
+    {
+      "scenario_id": "S-C004-consignment_duplicate_invoice",
+      "case_id": "C004",
+      "mutation": "consignment_duplicate_invoice",
+      "code": "CONSIGNMENT_INVOICE",
+      "severity": "high",
+      "event_id": "C004-03-invoice_received-INV-C004",
+      "message": "consignment flow should not receive PO-level invoice",
+      "evidence": {
+        "invoice_id": "INV-C004"
+      }
+    },
+    {
+      "scenario_id": "S-C004-consignment_duplicate_invoice",
+      "case_id": "C004",
+      "mutation": "consignment_duplicate_invoice",
+      "code": "CONSIGNMENT_INVOICE",
+      "severity": "high",
+      "event_id": "C004-04-invoice_received-INV-C004",
+      "message": "consignment flow should not receive PO-level invoice",
+      "evidence": {
+        "invoice_id": "INV-C004"
+      }
+    },
+    {
+      "scenario_id": "S-C004-consignment_invoice",
+      "case_id": "C004",
+      "mutation": "consignment_invoice",
+      "code": "CONSIGNMENT_INVOICE",
+      "severity": "high",
+      "event_id": "C004-03-invoice_received-INV-C004",
+      "message": "consignment flow should not receive PO-level invoice",
+      "evidence": {
+        "invoice_id": "INV-C004"
+      }
+    },
+    {
+      "scenario_id": "S-C004-duplicate_invoice",
+      "case_id": "C004",
+      "mutation": "duplicate_invoice",
+      "code": "CONSIGNMENT_INVOICE",
+      "severity": "high",
+      "event_id": "C004-03-invoice_received-INV-C004",
+      "message": "consignment flow should not receive PO-level invoice",
+      "evidence": {
+        "invoice_id": "INV-C004"
+      }
+    },
+    {
+      "scenario_id": "S-C004-duplicate_invoice",
+      "case_id": "C004",
+      "mutation": "duplicate_invoice",
+      "code": "CONSIGNMENT_INVOICE",
+      "severity": "high",
+      "event_id": "C004-04-invoice_received-INV-C004",
+      "message": "consignment flow should not receive PO-level invoice",
+      "evidence": {
+        "invoice_id": "INV-C004"
+      }
+    },
+    {
+      "scenario_id": "S-C004-vendor_mismatch",
+      "case_id": "C004",
+      "mutation": "vendor_mismatch",
+      "code": "CONSIGNMENT_INVOICE",
+      "severity": "high",
+      "event_id": "C004-08-invoice_received-BAD-INV-C004",
+      "message": "consignment flow should not receive PO-level invoice",
+      "evidence": {
+        "invoice_id": "BAD-INV-C004"
+      }
+    },
+    {
+      "scenario_id": "S-C005-amount_overbill",
+      "case_id": "C005",
+      "mutation": "amount_overbill",
+      "code": "VALUE_MISMATCH",
+      "severity": "high",
+      "event_id": "C005-08-invoice_received-OVER-INV-C005",
+      "message": "invoice amount does not match PO amount within tolerance",
+      "evidence": {
+        "po_amount": 1350.0,
+        "invoice_amount": 1425.0,
+        "delta": 75.0
+      }
+    },
+    {
+      "scenario_id": "S-C005-duplicate_invoice",
+      "case_id": "C005",
+      "mutation": "duplicate_invoice",
+      "code": "QUANTITY_MISMATCH",
+      "severity": "high",
+      "event_id": "C005-08-invoice_received-INV-C005",
+      "message": "invoice quantity does not match PO quantity within tolerance",
+      "evidence": {
+        "po_quantity": 10.0,
+        "invoice_quantity": 20.0,
+        "delta": 10.0
+      }
+    },
+    {
+      "scenario_id": "S-C005-duplicate_invoice",
+      "case_id": "C005",
+      "mutation": "duplicate_invoice",
+      "code": "VALUE_MISMATCH",
+      "severity": "high",
+      "event_id": "C005-08-invoice_received-INV-C005",
+      "message": "invoice amount does not match PO amount within tolerance",
+      "evidence": {
+        "po_amount": 1350.0,
+        "invoice_amount": 2700.0,
+        "delta": 1350.0
+      }
+    },
+    {
+      "scenario_id": "S-C006-duplicate_invoice",
+      "case_id": "C006",
+      "mutation": "duplicate_invoice",
+      "code": "QUANTITY_MISMATCH",
+      "severity": "high",
+      "event_id": "C006-08-invoice_received-INV-C006",
+      "message": "invoice quantity does not match PO quantity within tolerance",
+      "evidence": {
+        "po_quantity": 12.0,
+        "invoice_quantity": 24.0,
+        "delta": 12.0
+      }
+    },
+    {
+      "scenario_id": "S-C006-duplicate_invoice",
+      "case_id": "C006",
+      "mutation": "duplicate_invoice",
+      "code": "VALUE_MISMATCH",
+      "severity": "high",
+      "event_id": "C006-08-invoice_received-INV-C006",
+      "message": "invoice amount does not match PO amount within tolerance",
+      "evidence": {
+        "po_amount": 1900.0,
+        "invoice_amount": 3800.0,
+        "delta": 1900.0
+      }
+    },
+    {
+      "scenario_id": "S-C006-quantity_mismatch",
+      "case_id": "C006",
+      "mutation": "quantity_mismatch",
+      "code": "QUANTITY_MISMATCH",
+      "severity": "high",
+      "event_id": "C006-08-invoice_received-QTY-INV-C006",
+      "message": "invoice quantity does not match PO quantity within tolerance",
+      "evidence": {
+        "po_quantity": 12.0,
+        "invoice_quantity": 13.0,
+        "delta": 1.0
+      }
+    },
+    {
+      "scenario_id": "S-C007-amount_overbill",
+      "case_id": "C007",
+      "mutation": "amount_overbill",
+      "code": "VALUE_MISMATCH",
+      "severity": "high",
+      "event_id": "C007-08-invoice_received-OVER-INV-C007",
+      "message": "invoice amount does not match PO amount within tolerance",
+      "evidence": {
+        "po_amount": 740.0,
+        "invoice_amount": 815.0,
+        "delta": 75.0
+      }
+    },
+    {
+      "scenario_id": "S-C007-duplicate_invoice",
+      "case_id": "C007",
+      "mutation": "duplicate_invoice",
+      "code": "QUANTITY_MISMATCH",
+      "severity": "high",
+      "event_id": "C007-08-invoice_received-INV-C007",
+      "message": "invoice quantity does not match PO quantity within tolerance",
+      "evidence": {
+        "po_quantity": 4.0,
+        "invoice_quantity": 8.0,
+        "delta": 4.0
+      }
+    },
+    {
+      "scenario_id": "S-C007-duplicate_invoice",
+      "case_id": "C007",
+      "mutation": "duplicate_invoice",
+      "code": "VALUE_MISMATCH",
+      "severity": "high",
+      "event_id": "C007-08-invoice_received-INV-C007",
+      "message": "invoice amount does not match PO amount within tolerance",
+      "evidence": {
+        "po_amount": 740.0,
+        "invoice_amount": 1480.0,
+        "delta": 740.0
+      }
+    },
+    {
+      "scenario_id": "S-C008-consignment_duplicate_invoice",
+      "case_id": "C008",
+      "mutation": "consignment_duplicate_invoice",
+      "code": "CONSIGNMENT_INVOICE",
+      "severity": "high",
+      "event_id": "C008-03-invoice_received-INV-C008",
+      "message": "consignment flow should not receive PO-level invoice",
+      "evidence": {
+        "invoice_id": "INV-C008"
+      }
+    },
+    {
+      "scenario_id": "S-C008-consignment_duplicate_invoice",
+      "case_id": "C008",
+      "mutation": "consignment_duplicate_invoice",
+      "code": "CONSIGNMENT_INVOICE",
+      "severity": "high",
+      "event_id": "C008-04-invoice_received-INV-C008",
+      "message": "consignment flow should not receive PO-level invoice",
+      "evidence": {
+        "invoice_id": "INV-C008"
+      }
+    },
+    {
+      "scenario_id": "S-C008-consignment_invoice",
+      "case_id": "C008",
+      "mutation": "consignment_invoice",
+      "code": "CONSIGNMENT_INVOICE",
+      "severity": "high",
+      "event_id": "C008-03-invoice_received-INV-C008",
+      "message": "consignment flow should not receive PO-level invoice",
+      "evidence": {
+        "invoice_id": "INV-C008"
+      }
+    },
+    {
+      "scenario_id": "S-C008-duplicate_invoice",
+      "case_id": "C008",
+      "mutation": "duplicate_invoice",
+      "code": "CONSIGNMENT_INVOICE",
+      "severity": "high",
+      "event_id": "C008-03-invoice_received-INV-C008",
+      "message": "consignment flow should not receive PO-level invoice",
+      "evidence": {
+        "invoice_id": "INV-C008"
+      }
+    },
+    {
+      "scenario_id": "S-C008-duplicate_invoice",
+      "case_id": "C008",
+      "mutation": "duplicate_invoice",
+      "code": "CONSIGNMENT_INVOICE",
+      "severity": "high",
+      "event_id": "C008-04-invoice_received-INV-C008",
+      "message": "consignment flow should not receive PO-level invoice",
+      "evidence": {
+        "invoice_id": "INV-C008"
+      }
+    },
+    {
+      "scenario_id": "S-C008-vendor_mismatch",
+      "case_id": "C008",
+      "mutation": "vendor_mismatch",
+      "code": "CONSIGNMENT_INVOICE",
+      "severity": "high",
+      "event_id": "C008-08-invoice_received-BAD-INV-C008",
+      "message": "consignment flow should not receive PO-level invoice",
+      "evidence": {
+        "invoice_id": "BAD-INV-C008"
+      }
+    },
+    {
+      "scenario_id": "S-C009-amount_overbill",
+      "case_id": "C009",
+      "mutation": "amount_overbill",
+      "code": "VALUE_MISMATCH",
+      "severity": "high",
+      "event_id": "C009-08-invoice_received-OVER-INV-C009",
+      "message": "invoice amount does not match PO amount within tolerance",
+      "evidence": {
+        "po_amount": 1450.0,
+        "invoice_amount": 1525.0,
+        "delta": 75.0
+      }
+    },
+    {
+      "scenario_id": "S-C009-duplicate_invoice",
+      "case_id": "C009",
+      "mutation": "duplicate_invoice",
+      "code": "QUANTITY_MISMATCH",
+      "severity": "high",
+      "event_id": "C009-08-invoice_received-INV-C009",
+      "message": "invoice quantity does not match PO quantity within tolerance",
+      "evidence": {
+        "po_quantity": 10.0,
+        "invoice_quantity": 20.0,
+        "delta": 10.0
+      }
+    },
+    {
+      "scenario_id": "S-C009-duplicate_invoice",
+      "case_id": "C009",
+      "mutation": "duplicate_invoice",
+      "code": "VALUE_MISMATCH",
+      "severity": "high",
+      "event_id": "C009-08-invoice_received-INV-C009",
+      "message": "invoice amount does not match PO amount within tolerance",
+      "evidence": {
+        "po_amount": 1450.0,
+        "invoice_amount": 2900.0,
+        "delta": 1450.0
+      }
+    },
+    {
+      "scenario_id": "S-C010-duplicate_invoice",
+      "case_id": "C010",
+      "mutation": "duplicate_invoice",
+      "code": "QUANTITY_MISMATCH",
+      "severity": "high",
+      "event_id": "C010-08-invoice_received-INV-C010",
+      "message": "invoice quantity does not match PO quantity within tolerance",
+      "evidence": {
+        "po_quantity": 12.0,
+        "invoice_quantity": 24.0,
+        "delta": 12.0
+      }
+    },
+    {
+      "scenario_id": "S-C010-duplicate_invoice",
+      "case_id": "C010",
+      "mutation": "duplicate_invoice",
+      "code": "VALUE_MISMATCH",
+      "severity": "high",
+      "event_id": "C010-08-invoice_received-INV-C010",
+      "message": "invoice amount does not match PO amount within tolerance",
+      "evidence": {
+        "po_amount": 2000.0,
+        "invoice_amount": 4000.0,
+        "delta": 2000.0
+      }
+    },
+    {
+      "scenario_id": "S-C010-quantity_mismatch",
+      "case_id": "C010",
+      "mutation": "quantity_mismatch",
+      "code": "QUANTITY_MISMATCH",
+      "severity": "high",
+      "event_id": "C010-08-invoice_received-QTY-INV-C010",
+      "message": "invoice quantity does not match PO quantity within tolerance",
+      "evidence": {
+        "po_quantity": 12.0,
+        "invoice_quantity": 13.0,
+        "delta": 1.0
+      }
+    },
+    {
+      "scenario_id": "S-C011-amount_overbill",
+      "case_id": "C011",
+      "mutation": "amount_overbill",
+      "code": "VALUE_MISMATCH",
+      "severity": "high",
+      "event_id": "C011-08-invoice_received-OVER-INV-C011",
+      "message": "invoice amount does not match PO amount within tolerance",
+      "evidence": {
+        "po_amount": 840.0,
+        "invoice_amount": 915.0,
+        "delta": 75.0
+      }
+    },
+    {
+      "scenario_id": "S-C011-duplicate_invoice",
+      "case_id": "C011",
+      "mutation": "duplicate_invoice",
+      "code": "QUANTITY_MISMATCH",
+      "severity": "high",
+      "event_id": "C011-08-invoice_received-INV-C011",
+      "message": "invoice quantity does not match PO quantity within tolerance",
+      "evidence": {
+        "po_quantity": 4.0,
+        "invoice_quantity": 8.0,
+        "delta": 4.0
+      }
+    },
+    {
+      "scenario_id": "S-C011-duplicate_invoice",
+      "case_id": "C011",
+      "mutation": "duplicate_invoice",
+      "code": "VALUE_MISMATCH",
+      "severity": "high",
+      "event_id": "C011-08-invoice_received-INV-C011",
+      "message": "invoice amount does not match PO amount within tolerance",
+      "evidence": {
+        "po_amount": 840.0,
+        "invoice_amount": 1680.0,
+        "delta": 840.0
+      }
+    },
+    {
+      "scenario_id": "S-C012-consignment_duplicate_invoice",
+      "case_id": "C012",
+      "mutation": "consignment_duplicate_invoice",
+      "code": "CONSIGNMENT_INVOICE",
+      "severity": "high",
+      "event_id": "C012-03-invoice_received-INV-C012",
+      "message": "consignment flow should not receive PO-level invoice",
+      "evidence": {
+        "invoice_id": "INV-C012"
+      }
+    },
+    {
+      "scenario_id": "S-C012-consignment_duplicate_invoice",
+      "case_id": "C012",
+      "mutation": "consignment_duplicate_invoice",
+      "code": "CONSIGNMENT_INVOICE",
+      "severity": "high",
+      "event_id": "C012-04-invoice_received-INV-C012",
+      "message": "consignment flow should not receive PO-level invoice",
+      "evidence": {
+        "invoice_id": "INV-C012"
+      }
+    },
+    {
+      "scenario_id": "S-C012-consignment_invoice",
+      "case_id": "C012",
+      "mutation": "consignment_invoice",
+      "code": "CONSIGNMENT_INVOICE",
+      "severity": "high",
+      "event_id": "C012-03-invoice_received-INV-C012",
+      "message": "consignment flow should not receive PO-level invoice",
+      "evidence": {
+        "invoice_id": "INV-C012"
+      }
+    },
+    {
+      "scenario_id": "S-C012-duplicate_invoice",
+      "case_id": "C012",
+      "mutation": "duplicate_invoice",
+      "code": "CONSIGNMENT_INVOICE",
+      "severity": "high",
+      "event_id": "C012-03-invoice_received-INV-C012",
+      "message": "consignment flow should not receive PO-level invoice",
+      "evidence": {
+        "invoice_id": "INV-C012"
+      }
+    },
+    {
+      "scenario_id": "S-C012-duplicate_invoice",
+      "case_id": "C012",
+      "mutation": "duplicate_invoice",
+      "code": "CONSIGNMENT_INVOICE",
+      "severity": "high",
+      "event_id": "C012-04-invoice_received-INV-C012",
+      "message": "consignment flow should not receive PO-level invoice",
+      "evidence": {
+        "invoice_id": "INV-C012"
+      }
+    },
+    {
+      "scenario_id": "S-C012-vendor_mismatch",
+      "case_id": "C012",
+      "mutation": "vendor_mismatch",
+      "code": "CONSIGNMENT_INVOICE",
+      "severity": "high",
+      "event_id": "C012-08-invoice_received-BAD-INV-C012",
+      "message": "consignment flow should not receive PO-level invoice",
+      "evidence": {
+        "invoice_id": "BAD-INV-C012"
+      }
+    }
+  ],
+  "metric_glossary": {
+    "critical_policy_violations_caught": "seeded critical defects whose expected violation codes were emitted by the oracle",
+    "duplicate_catch_recall": "duplicate invoice scenarios caught by duplicate invoice rule",
+    "false_holds_on_clean_traces": "clean traces where the oracle found an unnecessary invoice hold",
+    "audit_trace_coverage": "runs containing the events needed to audit the policy decision"
+  }
+}

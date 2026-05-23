@@ -1,0 +1,1592 @@
+[
+  {
+    "scenario_id": "S-C001-duplicate_invoice",
+    "case_id": "C001",
+    "mutation": "duplicate_invoice",
+    "expected_codes": [
+      "DUPLICATE_INVOICE"
+    ],
+    "description": "duplicate invoice",
+    "replace_base": false,
+    "events": [
+      {
+        "case_id": "C001",
+        "event_id": "C001-08-invoice_received-INV-C001",
+        "timestamp": "2026-01-09T09:00:00Z",
+        "event_type": "invoice_received",
+        "po_id": "PO-C001",
+        "line_id": "10",
+        "vendor_id": "V01",
+        "invoice_id": "INV-C001",
+        "amount": 1250.0,
+        "quantity": 10.0,
+        "actor": "system",
+        "attrs": {}
+      }
+    ]
+  },
+  {
+    "scenario_id": "S-C001-vendor_mismatch",
+    "case_id": "C001",
+    "mutation": "vendor_mismatch",
+    "expected_codes": [
+      "VENDOR_MISMATCH"
+    ],
+    "description": "vendor mismatch",
+    "replace_base": false,
+    "events": [
+      {
+        "case_id": "C001",
+        "event_id": "C001-08-invoice_received-BAD-INV-C001",
+        "timestamp": "2026-01-09T09:00:00Z",
+        "event_type": "invoice_received",
+        "po_id": "PO-C001",
+        "line_id": "10",
+        "vendor_id": "V99",
+        "invoice_id": "BAD-INV-C001",
+        "amount": 0,
+        "quantity": 0,
+        "actor": "system",
+        "attrs": {}
+      }
+    ]
+  },
+  {
+    "scenario_id": "S-C001-amount_overbill",
+    "case_id": "C001",
+    "mutation": "amount_overbill",
+    "expected_codes": [
+      "VALUE_MISMATCH"
+    ],
+    "description": "amount overbill",
+    "replace_base": false,
+    "events": [
+      {
+        "case_id": "C001",
+        "event_id": "C001-08-invoice_received-OVER-INV-C001",
+        "timestamp": "2026-01-09T09:00:00Z",
+        "event_type": "invoice_received",
+        "po_id": "PO-C001",
+        "line_id": "10",
+        "vendor_id": "V01",
+        "invoice_id": "OVER-INV-C001",
+        "amount": 75.0,
+        "quantity": 0,
+        "actor": "system",
+        "attrs": {}
+      }
+    ]
+  },
+  {
+    "scenario_id": "S-C001-payment_before_gr",
+    "case_id": "C001",
+    "mutation": "payment_before_gr",
+    "expected_codes": [
+      "PAYMENT_BEFORE_GR"
+    ],
+    "description": "payment before gr",
+    "replace_base": false,
+    "events": [
+      {
+        "case_id": "C001",
+        "event_id": "C001-00-payment_cleared-EARLY-INV-C001",
+        "timestamp": "2026-01-01T09:00:00Z",
+        "event_type": "payment_cleared",
+        "po_id": "PO-C001",
+        "line_id": "10",
+        "vendor_id": "V01",
+        "invoice_id": "EARLY-INV-C001",
+        "amount": 1250.0,
+        "quantity": 10.0,
+        "actor": "batch",
+        "attrs": {}
+      }
+    ]
+  },
+  {
+    "scenario_id": "S-C002-duplicate_invoice",
+    "case_id": "C002",
+    "mutation": "duplicate_invoice",
+    "expected_codes": [
+      "DUPLICATE_INVOICE"
+    ],
+    "description": "duplicate invoice",
+    "replace_base": false,
+    "events": [
+      {
+        "case_id": "C002",
+        "event_id": "C002-08-invoice_received-INV-C002",
+        "timestamp": "2026-01-09T09:00:00Z",
+        "event_type": "invoice_received",
+        "po_id": "PO-C002",
+        "line_id": "10",
+        "vendor_id": "V02",
+        "invoice_id": "INV-C002",
+        "amount": 1800.0,
+        "quantity": 12.0,
+        "actor": "system",
+        "attrs": {}
+      }
+    ]
+  },
+  {
+    "scenario_id": "S-C002-vendor_mismatch",
+    "case_id": "C002",
+    "mutation": "vendor_mismatch",
+    "expected_codes": [
+      "VENDOR_MISMATCH"
+    ],
+    "description": "vendor mismatch",
+    "replace_base": false,
+    "events": [
+      {
+        "case_id": "C002",
+        "event_id": "C002-08-invoice_received-BAD-INV-C002",
+        "timestamp": "2026-01-09T09:00:00Z",
+        "event_type": "invoice_received",
+        "po_id": "PO-C002",
+        "line_id": "10",
+        "vendor_id": "V99",
+        "invoice_id": "BAD-INV-C002",
+        "amount": 0,
+        "quantity": 0,
+        "actor": "system",
+        "attrs": {}
+      }
+    ]
+  },
+  {
+    "scenario_id": "S-C002-quantity_mismatch",
+    "case_id": "C002",
+    "mutation": "quantity_mismatch",
+    "expected_codes": [
+      "QUANTITY_MISMATCH"
+    ],
+    "description": "quantity mismatch",
+    "replace_base": false,
+    "events": [
+      {
+        "case_id": "C002",
+        "event_id": "C002-08-invoice_received-QTY-INV-C002",
+        "timestamp": "2026-01-09T09:00:00Z",
+        "event_type": "invoice_received",
+        "po_id": "PO-C002",
+        "line_id": "10",
+        "vendor_id": "V02",
+        "invoice_id": "QTY-INV-C002",
+        "amount": 0,
+        "quantity": 1,
+        "actor": "system",
+        "attrs": {}
+      }
+    ]
+  },
+  {
+    "scenario_id": "S-C002-payment_before_approval",
+    "case_id": "C002",
+    "mutation": "payment_before_approval",
+    "expected_codes": [
+      "PAYMENT_BEFORE_APPROVAL"
+    ],
+    "description": "payment before approval",
+    "replace_base": true,
+    "events": [
+      {
+        "case_id": "C002",
+        "event_id": "C002-01-po_created-na",
+        "timestamp": "2026-01-02T09:00:00Z",
+        "event_type": "po_created",
+        "po_id": "PO-C002",
+        "line_id": "10",
+        "vendor_id": "V02",
+        "invoice_id": null,
+        "amount": 1800.0,
+        "quantity": 12.0,
+        "actor": "system",
+        "attrs": {}
+      },
+      {
+        "case_id": "C002",
+        "event_id": "C002-02-invoice_received-INV-C002",
+        "timestamp": "2026-01-03T09:00:00Z",
+        "event_type": "invoice_received",
+        "po_id": "PO-C002",
+        "line_id": "10",
+        "vendor_id": "V02",
+        "invoice_id": "INV-C002",
+        "amount": 1800.0,
+        "quantity": 12.0,
+        "actor": "system",
+        "attrs": {}
+      },
+      {
+        "case_id": "C002",
+        "event_id": "C002-03-goods_receipt-na",
+        "timestamp": "2026-01-04T09:00:00Z",
+        "event_type": "goods_receipt",
+        "po_id": "PO-C002",
+        "line_id": "10",
+        "vendor_id": "V02",
+        "invoice_id": null,
+        "amount": 1800.0,
+        "quantity": 12.0,
+        "actor": "system",
+        "attrs": {}
+      },
+      {
+        "case_id": "C002",
+        "event_id": "C002-04-payment_cleared-INV-C002",
+        "timestamp": "2026-01-05T09:00:00Z",
+        "event_type": "payment_cleared",
+        "po_id": "PO-C002",
+        "line_id": "10",
+        "vendor_id": "V02",
+        "invoice_id": "INV-C002",
+        "amount": 1800.0,
+        "quantity": 12.0,
+        "actor": "batch",
+        "attrs": {}
+      }
+    ]
+  },
+  {
+    "scenario_id": "S-C003-duplicate_invoice",
+    "case_id": "C003",
+    "mutation": "duplicate_invoice",
+    "expected_codes": [
+      "DUPLICATE_INVOICE"
+    ],
+    "description": "duplicate invoice",
+    "replace_base": false,
+    "events": [
+      {
+        "case_id": "C003",
+        "event_id": "C003-08-invoice_received-INV-C003",
+        "timestamp": "2026-01-09T09:00:00Z",
+        "event_type": "invoice_received",
+        "po_id": "PO-C003",
+        "line_id": "10",
+        "vendor_id": "V03",
+        "invoice_id": "INV-C003",
+        "amount": 640.0,
+        "quantity": 4.0,
+        "actor": "system",
+        "attrs": {}
+      }
+    ]
+  },
+  {
+    "scenario_id": "S-C003-vendor_mismatch",
+    "case_id": "C003",
+    "mutation": "vendor_mismatch",
+    "expected_codes": [
+      "VENDOR_MISMATCH"
+    ],
+    "description": "vendor mismatch",
+    "replace_base": false,
+    "events": [
+      {
+        "case_id": "C003",
+        "event_id": "C003-08-invoice_received-BAD-INV-C003",
+        "timestamp": "2026-01-09T09:00:00Z",
+        "event_type": "invoice_received",
+        "po_id": "PO-C003",
+        "line_id": "10",
+        "vendor_id": "V99",
+        "invoice_id": "BAD-INV-C003",
+        "amount": 0,
+        "quantity": 0,
+        "actor": "system",
+        "attrs": {}
+      }
+    ]
+  },
+  {
+    "scenario_id": "S-C003-amount_overbill",
+    "case_id": "C003",
+    "mutation": "amount_overbill",
+    "expected_codes": [
+      "VALUE_MISMATCH"
+    ],
+    "description": "amount overbill",
+    "replace_base": false,
+    "events": [
+      {
+        "case_id": "C003",
+        "event_id": "C003-08-invoice_received-OVER-INV-C003",
+        "timestamp": "2026-01-09T09:00:00Z",
+        "event_type": "invoice_received",
+        "po_id": "PO-C003",
+        "line_id": "10",
+        "vendor_id": "V03",
+        "invoice_id": "OVER-INV-C003",
+        "amount": 75.0,
+        "quantity": 0,
+        "actor": "system",
+        "attrs": {}
+      }
+    ]
+  },
+  {
+    "scenario_id": "S-C003-payment_while_blocked",
+    "case_id": "C003",
+    "mutation": "payment_while_blocked",
+    "expected_codes": [
+      "PAYMENT_WHILE_BLOCKED"
+    ],
+    "description": "payment while blocked",
+    "replace_base": true,
+    "events": [
+      {
+        "case_id": "C003",
+        "event_id": "C003-01-po_created-na",
+        "timestamp": "2026-01-02T09:00:00Z",
+        "event_type": "po_created",
+        "po_id": "PO-C003",
+        "line_id": "10",
+        "vendor_id": "V03",
+        "invoice_id": null,
+        "amount": 640.0,
+        "quantity": 4.0,
+        "actor": "system",
+        "attrs": {}
+      },
+      {
+        "case_id": "C003",
+        "event_id": "C003-02-invoice_received-INV-C003",
+        "timestamp": "2026-01-03T09:00:00Z",
+        "event_type": "invoice_received",
+        "po_id": "PO-C003",
+        "line_id": "10",
+        "vendor_id": "V03",
+        "invoice_id": "INV-C003",
+        "amount": 640.0,
+        "quantity": 4.0,
+        "actor": "system",
+        "attrs": {}
+      },
+      {
+        "case_id": "C003",
+        "event_id": "C003-03-invoice_blocked-INV-C003",
+        "timestamp": "2026-01-04T09:00:00Z",
+        "event_type": "invoice_blocked",
+        "po_id": "PO-C003",
+        "line_id": "10",
+        "vendor_id": "V03",
+        "invoice_id": "INV-C003",
+        "amount": 640.0,
+        "quantity": 4.0,
+        "actor": "system",
+        "attrs": {}
+      },
+      {
+        "case_id": "C003",
+        "event_id": "C003-04-payment_cleared-INV-C003",
+        "timestamp": "2026-01-05T09:00:00Z",
+        "event_type": "payment_cleared",
+        "po_id": "PO-C003",
+        "line_id": "10",
+        "vendor_id": "V03",
+        "invoice_id": "INV-C003",
+        "amount": 640.0,
+        "quantity": 4.0,
+        "actor": "batch",
+        "attrs": {}
+      }
+    ]
+  },
+  {
+    "scenario_id": "S-C004-duplicate_invoice",
+    "case_id": "C004",
+    "mutation": "duplicate_invoice",
+    "expected_codes": [
+      "CONSIGNMENT_INVOICE",
+      "DUPLICATE_INVOICE"
+    ],
+    "description": "duplicate invoice",
+    "replace_base": false,
+    "events": [
+      {
+        "case_id": "C004",
+        "event_id": "C004-03-invoice_received-INV-C004",
+        "timestamp": "2026-01-04T09:00:00Z",
+        "event_type": "invoice_received",
+        "po_id": "PO-C004",
+        "line_id": "10",
+        "vendor_id": "V04",
+        "invoice_id": "INV-C004",
+        "amount": 2200.0,
+        "quantity": 20.0,
+        "actor": "system",
+        "attrs": {}
+      },
+      {
+        "case_id": "C004",
+        "event_id": "C004-04-invoice_received-INV-C004",
+        "timestamp": "2026-01-05T09:00:00Z",
+        "event_type": "invoice_received",
+        "po_id": "PO-C004",
+        "line_id": "10",
+        "vendor_id": "V04",
+        "invoice_id": "INV-C004",
+        "amount": 2200.0,
+        "quantity": 20.0,
+        "actor": "system",
+        "attrs": {}
+      }
+    ]
+  },
+  {
+    "scenario_id": "S-C004-vendor_mismatch",
+    "case_id": "C004",
+    "mutation": "vendor_mismatch",
+    "expected_codes": [
+      "VENDOR_MISMATCH"
+    ],
+    "description": "vendor mismatch",
+    "replace_base": false,
+    "events": [
+      {
+        "case_id": "C004",
+        "event_id": "C004-08-invoice_received-BAD-INV-C004",
+        "timestamp": "2026-01-09T09:00:00Z",
+        "event_type": "invoice_received",
+        "po_id": "PO-C004",
+        "line_id": "10",
+        "vendor_id": "V99",
+        "invoice_id": "BAD-INV-C004",
+        "amount": 0,
+        "quantity": 0,
+        "actor": "system",
+        "attrs": {}
+      }
+    ]
+  },
+  {
+    "scenario_id": "S-C004-consignment_invoice",
+    "case_id": "C004",
+    "mutation": "consignment_invoice",
+    "expected_codes": [
+      "CONSIGNMENT_INVOICE"
+    ],
+    "description": "consignment invoice",
+    "replace_base": false,
+    "events": [
+      {
+        "case_id": "C004",
+        "event_id": "C004-03-invoice_received-INV-C004",
+        "timestamp": "2026-01-04T09:00:00Z",
+        "event_type": "invoice_received",
+        "po_id": "PO-C004",
+        "line_id": "10",
+        "vendor_id": "V04",
+        "invoice_id": "INV-C004",
+        "amount": 2200.0,
+        "quantity": 20.0,
+        "actor": "system",
+        "attrs": {}
+      }
+    ]
+  },
+  {
+    "scenario_id": "S-C004-consignment_duplicate_invoice",
+    "case_id": "C004",
+    "mutation": "consignment_duplicate_invoice",
+    "expected_codes": [
+      "CONSIGNMENT_INVOICE",
+      "DUPLICATE_INVOICE"
+    ],
+    "description": "consignment duplicate invoice",
+    "replace_base": false,
+    "events": [
+      {
+        "case_id": "C004",
+        "event_id": "C004-03-invoice_received-INV-C004",
+        "timestamp": "2026-01-04T09:00:00Z",
+        "event_type": "invoice_received",
+        "po_id": "PO-C004",
+        "line_id": "10",
+        "vendor_id": "V04",
+        "invoice_id": "INV-C004",
+        "amount": 2200.0,
+        "quantity": 20.0,
+        "actor": "system",
+        "attrs": {}
+      },
+      {
+        "case_id": "C004",
+        "event_id": "C004-04-invoice_received-INV-C004",
+        "timestamp": "2026-01-05T09:00:00Z",
+        "event_type": "invoice_received",
+        "po_id": "PO-C004",
+        "line_id": "10",
+        "vendor_id": "V04",
+        "invoice_id": "INV-C004",
+        "amount": 2200.0,
+        "quantity": 20.0,
+        "actor": "system",
+        "attrs": {}
+      }
+    ]
+  },
+  {
+    "scenario_id": "S-C005-duplicate_invoice",
+    "case_id": "C005",
+    "mutation": "duplicate_invoice",
+    "expected_codes": [
+      "DUPLICATE_INVOICE"
+    ],
+    "description": "duplicate invoice",
+    "replace_base": false,
+    "events": [
+      {
+        "case_id": "C005",
+        "event_id": "C005-08-invoice_received-INV-C005",
+        "timestamp": "2026-01-09T09:00:00Z",
+        "event_type": "invoice_received",
+        "po_id": "PO-C005",
+        "line_id": "10",
+        "vendor_id": "V01",
+        "invoice_id": "INV-C005",
+        "amount": 1350.0,
+        "quantity": 10.0,
+        "actor": "system",
+        "attrs": {}
+      }
+    ]
+  },
+  {
+    "scenario_id": "S-C005-vendor_mismatch",
+    "case_id": "C005",
+    "mutation": "vendor_mismatch",
+    "expected_codes": [
+      "VENDOR_MISMATCH"
+    ],
+    "description": "vendor mismatch",
+    "replace_base": false,
+    "events": [
+      {
+        "case_id": "C005",
+        "event_id": "C005-08-invoice_received-BAD-INV-C005",
+        "timestamp": "2026-01-09T09:00:00Z",
+        "event_type": "invoice_received",
+        "po_id": "PO-C005",
+        "line_id": "10",
+        "vendor_id": "V99",
+        "invoice_id": "BAD-INV-C005",
+        "amount": 0,
+        "quantity": 0,
+        "actor": "system",
+        "attrs": {}
+      }
+    ]
+  },
+  {
+    "scenario_id": "S-C005-amount_overbill",
+    "case_id": "C005",
+    "mutation": "amount_overbill",
+    "expected_codes": [
+      "VALUE_MISMATCH"
+    ],
+    "description": "amount overbill",
+    "replace_base": false,
+    "events": [
+      {
+        "case_id": "C005",
+        "event_id": "C005-08-invoice_received-OVER-INV-C005",
+        "timestamp": "2026-01-09T09:00:00Z",
+        "event_type": "invoice_received",
+        "po_id": "PO-C005",
+        "line_id": "10",
+        "vendor_id": "V01",
+        "invoice_id": "OVER-INV-C005",
+        "amount": 75.0,
+        "quantity": 0,
+        "actor": "system",
+        "attrs": {}
+      }
+    ]
+  },
+  {
+    "scenario_id": "S-C005-payment_before_gr",
+    "case_id": "C005",
+    "mutation": "payment_before_gr",
+    "expected_codes": [
+      "PAYMENT_BEFORE_GR"
+    ],
+    "description": "payment before gr",
+    "replace_base": false,
+    "events": [
+      {
+        "case_id": "C005",
+        "event_id": "C005-00-payment_cleared-EARLY-INV-C005",
+        "timestamp": "2026-01-01T09:00:00Z",
+        "event_type": "payment_cleared",
+        "po_id": "PO-C005",
+        "line_id": "10",
+        "vendor_id": "V01",
+        "invoice_id": "EARLY-INV-C005",
+        "amount": 1350.0,
+        "quantity": 10.0,
+        "actor": "batch",
+        "attrs": {}
+      }
+    ]
+  },
+  {
+    "scenario_id": "S-C006-duplicate_invoice",
+    "case_id": "C006",
+    "mutation": "duplicate_invoice",
+    "expected_codes": [
+      "DUPLICATE_INVOICE"
+    ],
+    "description": "duplicate invoice",
+    "replace_base": false,
+    "events": [
+      {
+        "case_id": "C006",
+        "event_id": "C006-08-invoice_received-INV-C006",
+        "timestamp": "2026-01-09T09:00:00Z",
+        "event_type": "invoice_received",
+        "po_id": "PO-C006",
+        "line_id": "10",
+        "vendor_id": "V02",
+        "invoice_id": "INV-C006",
+        "amount": 1900.0,
+        "quantity": 12.0,
+        "actor": "system",
+        "attrs": {}
+      }
+    ]
+  },
+  {
+    "scenario_id": "S-C006-vendor_mismatch",
+    "case_id": "C006",
+    "mutation": "vendor_mismatch",
+    "expected_codes": [
+      "VENDOR_MISMATCH"
+    ],
+    "description": "vendor mismatch",
+    "replace_base": false,
+    "events": [
+      {
+        "case_id": "C006",
+        "event_id": "C006-08-invoice_received-BAD-INV-C006",
+        "timestamp": "2026-01-09T09:00:00Z",
+        "event_type": "invoice_received",
+        "po_id": "PO-C006",
+        "line_id": "10",
+        "vendor_id": "V99",
+        "invoice_id": "BAD-INV-C006",
+        "amount": 0,
+        "quantity": 0,
+        "actor": "system",
+        "attrs": {}
+      }
+    ]
+  },
+  {
+    "scenario_id": "S-C006-quantity_mismatch",
+    "case_id": "C006",
+    "mutation": "quantity_mismatch",
+    "expected_codes": [
+      "QUANTITY_MISMATCH"
+    ],
+    "description": "quantity mismatch",
+    "replace_base": false,
+    "events": [
+      {
+        "case_id": "C006",
+        "event_id": "C006-08-invoice_received-QTY-INV-C006",
+        "timestamp": "2026-01-09T09:00:00Z",
+        "event_type": "invoice_received",
+        "po_id": "PO-C006",
+        "line_id": "10",
+        "vendor_id": "V02",
+        "invoice_id": "QTY-INV-C006",
+        "amount": 0,
+        "quantity": 1,
+        "actor": "system",
+        "attrs": {}
+      }
+    ]
+  },
+  {
+    "scenario_id": "S-C006-payment_before_approval",
+    "case_id": "C006",
+    "mutation": "payment_before_approval",
+    "expected_codes": [
+      "PAYMENT_BEFORE_APPROVAL"
+    ],
+    "description": "payment before approval",
+    "replace_base": true,
+    "events": [
+      {
+        "case_id": "C006",
+        "event_id": "C006-01-po_created-na",
+        "timestamp": "2026-01-02T09:00:00Z",
+        "event_type": "po_created",
+        "po_id": "PO-C006",
+        "line_id": "10",
+        "vendor_id": "V02",
+        "invoice_id": null,
+        "amount": 1900.0,
+        "quantity": 12.0,
+        "actor": "system",
+        "attrs": {}
+      },
+      {
+        "case_id": "C006",
+        "event_id": "C006-02-invoice_received-INV-C006",
+        "timestamp": "2026-01-03T09:00:00Z",
+        "event_type": "invoice_received",
+        "po_id": "PO-C006",
+        "line_id": "10",
+        "vendor_id": "V02",
+        "invoice_id": "INV-C006",
+        "amount": 1900.0,
+        "quantity": 12.0,
+        "actor": "system",
+        "attrs": {}
+      },
+      {
+        "case_id": "C006",
+        "event_id": "C006-03-goods_receipt-na",
+        "timestamp": "2026-01-04T09:00:00Z",
+        "event_type": "goods_receipt",
+        "po_id": "PO-C006",
+        "line_id": "10",
+        "vendor_id": "V02",
+        "invoice_id": null,
+        "amount": 1900.0,
+        "quantity": 12.0,
+        "actor": "system",
+        "attrs": {}
+      },
+      {
+        "case_id": "C006",
+        "event_id": "C006-04-payment_cleared-INV-C006",
+        "timestamp": "2026-01-05T09:00:00Z",
+        "event_type": "payment_cleared",
+        "po_id": "PO-C006",
+        "line_id": "10",
+        "vendor_id": "V02",
+        "invoice_id": "INV-C006",
+        "amount": 1900.0,
+        "quantity": 12.0,
+        "actor": "batch",
+        "attrs": {}
+      }
+    ]
+  },
+  {
+    "scenario_id": "S-C007-duplicate_invoice",
+    "case_id": "C007",
+    "mutation": "duplicate_invoice",
+    "expected_codes": [
+      "DUPLICATE_INVOICE"
+    ],
+    "description": "duplicate invoice",
+    "replace_base": false,
+    "events": [
+      {
+        "case_id": "C007",
+        "event_id": "C007-08-invoice_received-INV-C007",
+        "timestamp": "2026-01-09T09:00:00Z",
+        "event_type": "invoice_received",
+        "po_id": "PO-C007",
+        "line_id": "10",
+        "vendor_id": "V03",
+        "invoice_id": "INV-C007",
+        "amount": 740.0,
+        "quantity": 4.0,
+        "actor": "system",
+        "attrs": {}
+      }
+    ]
+  },
+  {
+    "scenario_id": "S-C007-vendor_mismatch",
+    "case_id": "C007",
+    "mutation": "vendor_mismatch",
+    "expected_codes": [
+      "VENDOR_MISMATCH"
+    ],
+    "description": "vendor mismatch",
+    "replace_base": false,
+    "events": [
+      {
+        "case_id": "C007",
+        "event_id": "C007-08-invoice_received-BAD-INV-C007",
+        "timestamp": "2026-01-09T09:00:00Z",
+        "event_type": "invoice_received",
+        "po_id": "PO-C007",
+        "line_id": "10",
+        "vendor_id": "V99",
+        "invoice_id": "BAD-INV-C007",
+        "amount": 0,
+        "quantity": 0,
+        "actor": "system",
+        "attrs": {}
+      }
+    ]
+  },
+  {
+    "scenario_id": "S-C007-amount_overbill",
+    "case_id": "C007",
+    "mutation": "amount_overbill",
+    "expected_codes": [
+      "VALUE_MISMATCH"
+    ],
+    "description": "amount overbill",
+    "replace_base": false,
+    "events": [
+      {
+        "case_id": "C007",
+        "event_id": "C007-08-invoice_received-OVER-INV-C007",
+        "timestamp": "2026-01-09T09:00:00Z",
+        "event_type": "invoice_received",
+        "po_id": "PO-C007",
+        "line_id": "10",
+        "vendor_id": "V03",
+        "invoice_id": "OVER-INV-C007",
+        "amount": 75.0,
+        "quantity": 0,
+        "actor": "system",
+        "attrs": {}
+      }
+    ]
+  },
+  {
+    "scenario_id": "S-C007-payment_while_blocked",
+    "case_id": "C007",
+    "mutation": "payment_while_blocked",
+    "expected_codes": [
+      "PAYMENT_WHILE_BLOCKED"
+    ],
+    "description": "payment while blocked",
+    "replace_base": true,
+    "events": [
+      {
+        "case_id": "C007",
+        "event_id": "C007-01-po_created-na",
+        "timestamp": "2026-01-02T09:00:00Z",
+        "event_type": "po_created",
+        "po_id": "PO-C007",
+        "line_id": "10",
+        "vendor_id": "V03",
+        "invoice_id": null,
+        "amount": 740.0,
+        "quantity": 4.0,
+        "actor": "system",
+        "attrs": {}
+      },
+      {
+        "case_id": "C007",
+        "event_id": "C007-02-invoice_received-INV-C007",
+        "timestamp": "2026-01-03T09:00:00Z",
+        "event_type": "invoice_received",
+        "po_id": "PO-C007",
+        "line_id": "10",
+        "vendor_id": "V03",
+        "invoice_id": "INV-C007",
+        "amount": 740.0,
+        "quantity": 4.0,
+        "actor": "system",
+        "attrs": {}
+      },
+      {
+        "case_id": "C007",
+        "event_id": "C007-03-invoice_blocked-INV-C007",
+        "timestamp": "2026-01-04T09:00:00Z",
+        "event_type": "invoice_blocked",
+        "po_id": "PO-C007",
+        "line_id": "10",
+        "vendor_id": "V03",
+        "invoice_id": "INV-C007",
+        "amount": 740.0,
+        "quantity": 4.0,
+        "actor": "system",
+        "attrs": {}
+      },
+      {
+        "case_id": "C007",
+        "event_id": "C007-04-payment_cleared-INV-C007",
+        "timestamp": "2026-01-05T09:00:00Z",
+        "event_type": "payment_cleared",
+        "po_id": "PO-C007",
+        "line_id": "10",
+        "vendor_id": "V03",
+        "invoice_id": "INV-C007",
+        "amount": 740.0,
+        "quantity": 4.0,
+        "actor": "batch",
+        "attrs": {}
+      }
+    ]
+  },
+  {
+    "scenario_id": "S-C008-duplicate_invoice",
+    "case_id": "C008",
+    "mutation": "duplicate_invoice",
+    "expected_codes": [
+      "CONSIGNMENT_INVOICE",
+      "DUPLICATE_INVOICE"
+    ],
+    "description": "duplicate invoice",
+    "replace_base": false,
+    "events": [
+      {
+        "case_id": "C008",
+        "event_id": "C008-03-invoice_received-INV-C008",
+        "timestamp": "2026-01-04T09:00:00Z",
+        "event_type": "invoice_received",
+        "po_id": "PO-C008",
+        "line_id": "10",
+        "vendor_id": "V04",
+        "invoice_id": "INV-C008",
+        "amount": 2300.0,
+        "quantity": 20.0,
+        "actor": "system",
+        "attrs": {}
+      },
+      {
+        "case_id": "C008",
+        "event_id": "C008-04-invoice_received-INV-C008",
+        "timestamp": "2026-01-05T09:00:00Z",
+        "event_type": "invoice_received",
+        "po_id": "PO-C008",
+        "line_id": "10",
+        "vendor_id": "V04",
+        "invoice_id": "INV-C008",
+        "amount": 2300.0,
+        "quantity": 20.0,
+        "actor": "system",
+        "attrs": {}
+      }
+    ]
+  },
+  {
+    "scenario_id": "S-C008-vendor_mismatch",
+    "case_id": "C008",
+    "mutation": "vendor_mismatch",
+    "expected_codes": [
+      "VENDOR_MISMATCH"
+    ],
+    "description": "vendor mismatch",
+    "replace_base": false,
+    "events": [
+      {
+        "case_id": "C008",
+        "event_id": "C008-08-invoice_received-BAD-INV-C008",
+        "timestamp": "2026-01-09T09:00:00Z",
+        "event_type": "invoice_received",
+        "po_id": "PO-C008",
+        "line_id": "10",
+        "vendor_id": "V99",
+        "invoice_id": "BAD-INV-C008",
+        "amount": 0,
+        "quantity": 0,
+        "actor": "system",
+        "attrs": {}
+      }
+    ]
+  },
+  {
+    "scenario_id": "S-C008-consignment_invoice",
+    "case_id": "C008",
+    "mutation": "consignment_invoice",
+    "expected_codes": [
+      "CONSIGNMENT_INVOICE"
+    ],
+    "description": "consignment invoice",
+    "replace_base": false,
+    "events": [
+      {
+        "case_id": "C008",
+        "event_id": "C008-03-invoice_received-INV-C008",
+        "timestamp": "2026-01-04T09:00:00Z",
+        "event_type": "invoice_received",
+        "po_id": "PO-C008",
+        "line_id": "10",
+        "vendor_id": "V04",
+        "invoice_id": "INV-C008",
+        "amount": 2300.0,
+        "quantity": 20.0,
+        "actor": "system",
+        "attrs": {}
+      }
+    ]
+  },
+  {
+    "scenario_id": "S-C008-consignment_duplicate_invoice",
+    "case_id": "C008",
+    "mutation": "consignment_duplicate_invoice",
+    "expected_codes": [
+      "CONSIGNMENT_INVOICE",
+      "DUPLICATE_INVOICE"
+    ],
+    "description": "consignment duplicate invoice",
+    "replace_base": false,
+    "events": [
+      {
+        "case_id": "C008",
+        "event_id": "C008-03-invoice_received-INV-C008",
+        "timestamp": "2026-01-04T09:00:00Z",
+        "event_type": "invoice_received",
+        "po_id": "PO-C008",
+        "line_id": "10",
+        "vendor_id": "V04",
+        "invoice_id": "INV-C008",
+        "amount": 2300.0,
+        "quantity": 20.0,
+        "actor": "system",
+        "attrs": {}
+      },
+      {
+        "case_id": "C008",
+        "event_id": "C008-04-invoice_received-INV-C008",
+        "timestamp": "2026-01-05T09:00:00Z",
+        "event_type": "invoice_received",
+        "po_id": "PO-C008",
+        "line_id": "10",
+        "vendor_id": "V04",
+        "invoice_id": "INV-C008",
+        "amount": 2300.0,
+        "quantity": 20.0,
+        "actor": "system",
+        "attrs": {}
+      }
+    ]
+  },
+  {
+    "scenario_id": "S-C009-duplicate_invoice",
+    "case_id": "C009",
+    "mutation": "duplicate_invoice",
+    "expected_codes": [
+      "DUPLICATE_INVOICE"
+    ],
+    "description": "duplicate invoice",
+    "replace_base": false,
+    "events": [
+      {
+        "case_id": "C009",
+        "event_id": "C009-08-invoice_received-INV-C009",
+        "timestamp": "2026-01-09T09:00:00Z",
+        "event_type": "invoice_received",
+        "po_id": "PO-C009",
+        "line_id": "10",
+        "vendor_id": "V01",
+        "invoice_id": "INV-C009",
+        "amount": 1450.0,
+        "quantity": 10.0,
+        "actor": "system",
+        "attrs": {}
+      }
+    ]
+  },
+  {
+    "scenario_id": "S-C009-vendor_mismatch",
+    "case_id": "C009",
+    "mutation": "vendor_mismatch",
+    "expected_codes": [
+      "VENDOR_MISMATCH"
+    ],
+    "description": "vendor mismatch",
+    "replace_base": false,
+    "events": [
+      {
+        "case_id": "C009",
+        "event_id": "C009-08-invoice_received-BAD-INV-C009",
+        "timestamp": "2026-01-09T09:00:00Z",
+        "event_type": "invoice_received",
+        "po_id": "PO-C009",
+        "line_id": "10",
+        "vendor_id": "V99",
+        "invoice_id": "BAD-INV-C009",
+        "amount": 0,
+        "quantity": 0,
+        "actor": "system",
+        "attrs": {}
+      }
+    ]
+  },
+  {
+    "scenario_id": "S-C009-amount_overbill",
+    "case_id": "C009",
+    "mutation": "amount_overbill",
+    "expected_codes": [
+      "VALUE_MISMATCH"
+    ],
+    "description": "amount overbill",
+    "replace_base": false,
+    "events": [
+      {
+        "case_id": "C009",
+        "event_id": "C009-08-invoice_received-OVER-INV-C009",
+        "timestamp": "2026-01-09T09:00:00Z",
+        "event_type": "invoice_received",
+        "po_id": "PO-C009",
+        "line_id": "10",
+        "vendor_id": "V01",
+        "invoice_id": "OVER-INV-C009",
+        "amount": 75.0,
+        "quantity": 0,
+        "actor": "system",
+        "attrs": {}
+      }
+    ]
+  },
+  {
+    "scenario_id": "S-C009-payment_before_gr",
+    "case_id": "C009",
+    "mutation": "payment_before_gr",
+    "expected_codes": [
+      "PAYMENT_BEFORE_GR"
+    ],
+    "description": "payment before gr",
+    "replace_base": false,
+    "events": [
+      {
+        "case_id": "C009",
+        "event_id": "C009-00-payment_cleared-EARLY-INV-C009",
+        "timestamp": "2026-01-01T09:00:00Z",
+        "event_type": "payment_cleared",
+        "po_id": "PO-C009",
+        "line_id": "10",
+        "vendor_id": "V01",
+        "invoice_id": "EARLY-INV-C009",
+        "amount": 1450.0,
+        "quantity": 10.0,
+        "actor": "batch",
+        "attrs": {}
+      }
+    ]
+  },
+  {
+    "scenario_id": "S-C010-duplicate_invoice",
+    "case_id": "C010",
+    "mutation": "duplicate_invoice",
+    "expected_codes": [
+      "DUPLICATE_INVOICE"
+    ],
+    "description": "duplicate invoice",
+    "replace_base": false,
+    "events": [
+      {
+        "case_id": "C010",
+        "event_id": "C010-08-invoice_received-INV-C010",
+        "timestamp": "2026-01-09T09:00:00Z",
+        "event_type": "invoice_received",
+        "po_id": "PO-C010",
+        "line_id": "10",
+        "vendor_id": "V02",
+        "invoice_id": "INV-C010",
+        "amount": 2000.0,
+        "quantity": 12.0,
+        "actor": "system",
+        "attrs": {}
+      }
+    ]
+  },
+  {
+    "scenario_id": "S-C010-vendor_mismatch",
+    "case_id": "C010",
+    "mutation": "vendor_mismatch",
+    "expected_codes": [
+      "VENDOR_MISMATCH"
+    ],
+    "description": "vendor mismatch",
+    "replace_base": false,
+    "events": [
+      {
+        "case_id": "C010",
+        "event_id": "C010-08-invoice_received-BAD-INV-C010",
+        "timestamp": "2026-01-09T09:00:00Z",
+        "event_type": "invoice_received",
+        "po_id": "PO-C010",
+        "line_id": "10",
+        "vendor_id": "V99",
+        "invoice_id": "BAD-INV-C010",
+        "amount": 0,
+        "quantity": 0,
+        "actor": "system",
+        "attrs": {}
+      }
+    ]
+  },
+  {
+    "scenario_id": "S-C010-quantity_mismatch",
+    "case_id": "C010",
+    "mutation": "quantity_mismatch",
+    "expected_codes": [
+      "QUANTITY_MISMATCH"
+    ],
+    "description": "quantity mismatch",
+    "replace_base": false,
+    "events": [
+      {
+        "case_id": "C010",
+        "event_id": "C010-08-invoice_received-QTY-INV-C010",
+        "timestamp": "2026-01-09T09:00:00Z",
+        "event_type": "invoice_received",
+        "po_id": "PO-C010",
+        "line_id": "10",
+        "vendor_id": "V02",
+        "invoice_id": "QTY-INV-C010",
+        "amount": 0,
+        "quantity": 1,
+        "actor": "system",
+        "attrs": {}
+      }
+    ]
+  },
+  {
+    "scenario_id": "S-C010-payment_before_approval",
+    "case_id": "C010",
+    "mutation": "payment_before_approval",
+    "expected_codes": [
+      "PAYMENT_BEFORE_APPROVAL"
+    ],
+    "description": "payment before approval",
+    "replace_base": true,
+    "events": [
+      {
+        "case_id": "C010",
+        "event_id": "C010-01-po_created-na",
+        "timestamp": "2026-01-02T09:00:00Z",
+        "event_type": "po_created",
+        "po_id": "PO-C010",
+        "line_id": "10",
+        "vendor_id": "V02",
+        "invoice_id": null,
+        "amount": 2000.0,
+        "quantity": 12.0,
+        "actor": "system",
+        "attrs": {}
+      },
+      {
+        "case_id": "C010",
+        "event_id": "C010-02-invoice_received-INV-C010",
+        "timestamp": "2026-01-03T09:00:00Z",
+        "event_type": "invoice_received",
+        "po_id": "PO-C010",
+        "line_id": "10",
+        "vendor_id": "V02",
+        "invoice_id": "INV-C010",
+        "amount": 2000.0,
+        "quantity": 12.0,
+        "actor": "system",
+        "attrs": {}
+      },
+      {
+        "case_id": "C010",
+        "event_id": "C010-03-goods_receipt-na",
+        "timestamp": "2026-01-04T09:00:00Z",
+        "event_type": "goods_receipt",
+        "po_id": "PO-C010",
+        "line_id": "10",
+        "vendor_id": "V02",
+        "invoice_id": null,
+        "amount": 2000.0,
+        "quantity": 12.0,
+        "actor": "system",
+        "attrs": {}
+      },
+      {
+        "case_id": "C010",
+        "event_id": "C010-04-payment_cleared-INV-C010",
+        "timestamp": "2026-01-05T09:00:00Z",
+        "event_type": "payment_cleared",
+        "po_id": "PO-C010",
+        "line_id": "10",
+        "vendor_id": "V02",
+        "invoice_id": "INV-C010",
+        "amount": 2000.0,
+        "quantity": 12.0,
+        "actor": "batch",
+        "attrs": {}
+      }
+    ]
+  },
+  {
+    "scenario_id": "S-C011-duplicate_invoice",
+    "case_id": "C011",
+    "mutation": "duplicate_invoice",
+    "expected_codes": [
+      "DUPLICATE_INVOICE"
+    ],
+    "description": "duplicate invoice",
+    "replace_base": false,
+    "events": [
+      {
+        "case_id": "C011",
+        "event_id": "C011-08-invoice_received-INV-C011",
+        "timestamp": "2026-01-09T09:00:00Z",
+        "event_type": "invoice_received",
+        "po_id": "PO-C011",
+        "line_id": "10",
+        "vendor_id": "V03",
+        "invoice_id": "INV-C011",
+        "amount": 840.0,
+        "quantity": 4.0,
+        "actor": "system",
+        "attrs": {}
+      }
+    ]
+  },
+  {
+    "scenario_id": "S-C011-vendor_mismatch",
+    "case_id": "C011",
+    "mutation": "vendor_mismatch",
+    "expected_codes": [
+      "VENDOR_MISMATCH"
+    ],
+    "description": "vendor mismatch",
+    "replace_base": false,
+    "events": [
+      {
+        "case_id": "C011",
+        "event_id": "C011-08-invoice_received-BAD-INV-C011",
+        "timestamp": "2026-01-09T09:00:00Z",
+        "event_type": "invoice_received",
+        "po_id": "PO-C011",
+        "line_id": "10",
+        "vendor_id": "V99",
+        "invoice_id": "BAD-INV-C011",
+        "amount": 0,
+        "quantity": 0,
+        "actor": "system",
+        "attrs": {}
+      }
+    ]
+  },
+  {
+    "scenario_id": "S-C011-amount_overbill",
+    "case_id": "C011",
+    "mutation": "amount_overbill",
+    "expected_codes": [
+      "VALUE_MISMATCH"
+    ],
+    "description": "amount overbill",
+    "replace_base": false,
+    "events": [
+      {
+        "case_id": "C011",
+        "event_id": "C011-08-invoice_received-OVER-INV-C011",
+        "timestamp": "2026-01-09T09:00:00Z",
+        "event_type": "invoice_received",
+        "po_id": "PO-C011",
+        "line_id": "10",
+        "vendor_id": "V03",
+        "invoice_id": "OVER-INV-C011",
+        "amount": 75.0,
+        "quantity": 0,
+        "actor": "system",
+        "attrs": {}
+      }
+    ]
+  },
+  {
+    "scenario_id": "S-C011-payment_while_blocked",
+    "case_id": "C011",
+    "mutation": "payment_while_blocked",
+    "expected_codes": [
+      "PAYMENT_WHILE_BLOCKED"
+    ],
+    "description": "payment while blocked",
+    "replace_base": true,
+    "events": [
+      {
+        "case_id": "C011",
+        "event_id": "C011-01-po_created-na",
+        "timestamp": "2026-01-02T09:00:00Z",
+        "event_type": "po_created",
+        "po_id": "PO-C011",
+        "line_id": "10",
+        "vendor_id": "V03",
+        "invoice_id": null,
+        "amount": 840.0,
+        "quantity": 4.0,
+        "actor": "system",
+        "attrs": {}
+      },
+      {
+        "case_id": "C011",
+        "event_id": "C011-02-invoice_received-INV-C011",
+        "timestamp": "2026-01-03T09:00:00Z",
+        "event_type": "invoice_received",
+        "po_id": "PO-C011",
+        "line_id": "10",
+        "vendor_id": "V03",
+        "invoice_id": "INV-C011",
+        "amount": 840.0,
+        "quantity": 4.0,
+        "actor": "system",
+        "attrs": {}
+      },
+      {
+        "case_id": "C011",
+        "event_id": "C011-03-invoice_blocked-INV-C011",
+        "timestamp": "2026-01-04T09:00:00Z",
+        "event_type": "invoice_blocked",
+        "po_id": "PO-C011",
+        "line_id": "10",
+        "vendor_id": "V03",
+        "invoice_id": "INV-C011",
+        "amount": 840.0,
+        "quantity": 4.0,
+        "actor": "system",
+        "attrs": {}
+      },
+      {
+        "case_id": "C011",
+        "event_id": "C011-04-payment_cleared-INV-C011",
+        "timestamp": "2026-01-05T09:00:00Z",
+        "event_type": "payment_cleared",
+        "po_id": "PO-C011",
+        "line_id": "10",
+        "vendor_id": "V03",
+        "invoice_id": "INV-C011",
+        "amount": 840.0,
+        "quantity": 4.0,
+        "actor": "batch",
+        "attrs": {}
+      }
+    ]
+  },
+  {
+    "scenario_id": "S-C012-duplicate_invoice",
+    "case_id": "C012",
+    "mutation": "duplicate_invoice",
+    "expected_codes": [
+      "CONSIGNMENT_INVOICE",
+      "DUPLICATE_INVOICE"
+    ],
+    "description": "duplicate invoice",
+    "replace_base": false,
+    "events": [
+      {
+        "case_id": "C012",
+        "event_id": "C012-03-invoice_received-INV-C012",
+        "timestamp": "2026-01-04T09:00:00Z",
+        "event_type": "invoice_received",
+        "po_id": "PO-C012",
+        "line_id": "10",
+        "vendor_id": "V04",
+        "invoice_id": "INV-C012",
+        "amount": 2400.0,
+        "quantity": 20.0,
+        "actor": "system",
+        "attrs": {}
+      },
+      {
+        "case_id": "C012",
+        "event_id": "C012-04-invoice_received-INV-C012",
+        "timestamp": "2026-01-05T09:00:00Z",
+        "event_type": "invoice_received",
+        "po_id": "PO-C012",
+        "line_id": "10",
+        "vendor_id": "V04",
+        "invoice_id": "INV-C012",
+        "amount": 2400.0,
+        "quantity": 20.0,
+        "actor": "system",
+        "attrs": {}
+      }
+    ]
+  },
+  {
+    "scenario_id": "S-C012-vendor_mismatch",
+    "case_id": "C012",
+    "mutation": "vendor_mismatch",
+    "expected_codes": [
+      "VENDOR_MISMATCH"
+    ],
+    "description": "vendor mismatch",
+    "replace_base": false,
+    "events": [
+      {
+        "case_id": "C012",
+        "event_id": "C012-08-invoice_received-BAD-INV-C012",
+        "timestamp": "2026-01-09T09:00:00Z",
+        "event_type": "invoice_received",
+        "po_id": "PO-C012",
+        "line_id": "10",
+        "vendor_id": "V99",
+        "invoice_id": "BAD-INV-C012",
+        "amount": 0,
+        "quantity": 0,
+        "actor": "system",
+        "attrs": {}
+      }
+    ]
+  },
+  {
+    "scenario_id": "S-C012-consignment_invoice",
+    "case_id": "C012",
+    "mutation": "consignment_invoice",
+    "expected_codes": [
+      "CONSIGNMENT_INVOICE"
+    ],
+    "description": "consignment invoice",
+    "replace_base": false,
+    "events": [
+      {
+        "case_id": "C012",
+        "event_id": "C012-03-invoice_received-INV-C012",
+        "timestamp": "2026-01-04T09:00:00Z",
+        "event_type": "invoice_received",
+        "po_id": "PO-C012",
+        "line_id": "10",
+        "vendor_id": "V04",
+        "invoice_id": "INV-C012",
+        "amount": 2400.0,
+        "quantity": 20.0,
+        "actor": "system",
+        "attrs": {}
+      }
+    ]
+  },
+  {
+    "scenario_id": "S-C012-consignment_duplicate_invoice",
+    "case_id": "C012",
+    "mutation": "consignment_duplicate_invoice",
+    "expected_codes": [
+      "CONSIGNMENT_INVOICE",
+      "DUPLICATE_INVOICE"
+    ],
+    "description": "consignment duplicate invoice",
+    "replace_base": false,
+    "events": [
+      {
+        "case_id": "C012",
+        "event_id": "C012-03-invoice_received-INV-C012",
+        "timestamp": "2026-01-04T09:00:00Z",
+        "event_type": "invoice_received",
+        "po_id": "PO-C012",
+        "line_id": "10",
+        "vendor_id": "V04",
+        "invoice_id": "INV-C012",
+        "amount": 2400.0,
+        "quantity": 20.0,
+        "actor": "system",
+        "attrs": {}
+      },
+      {
+        "case_id": "C012",
+        "event_id": "C012-04-invoice_received-INV-C012",
+        "timestamp": "2026-01-05T09:00:00Z",
+        "event_type": "invoice_received",
+        "po_id": "PO-C012",
+        "line_id": "10",
+        "vendor_id": "V04",
+        "invoice_id": "INV-C012",
+        "amount": 2400.0,
+        "quantity": 20.0,
+        "actor": "system",
+        "attrs": {}
+      }
+    ]
+  }
+]
