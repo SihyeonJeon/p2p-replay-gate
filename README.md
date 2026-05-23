@@ -7,7 +7,7 @@ Invoice agents fail when documents disagree: duplicate invoices, partial receipt
 ## What it does
 
 - replays P2P traces from JSONL
-- imports process-mining style CSV event logs into the replay format
+- imports process-mining style CSV or XES event logs into the replay format
 - writes a policy skeleton for imported traces
 - injects seeded procurement defects
 - checks 2-way, 3-way, consignment, approval, duplicate, and payment-hold rules
@@ -22,7 +22,7 @@ Fixture v0
 | --- | ---: |
 | clean traces | 12 |
 | injected scenarios | 48 |
-| tests | 45 |
+| tests | 47 |
 | critical policy violations caught | 36/36 |
 | duplicate catch recall | 1.000 |
 | false holds on clean traces | 0 |
@@ -49,6 +49,12 @@ p2p-replay-gate audit --events imported/events.jsonl --policy imported/policy.js
 ```
 
 `policy-template` fails when amount data is missing, unless `--allow-missing-amount` is passed.
+
+XES works the same way:
+
+```bash
+p2p-replay-gate import-xes --input examples/events.xes --output imported/events.jsonl --strict
+```
 
 Test:
 

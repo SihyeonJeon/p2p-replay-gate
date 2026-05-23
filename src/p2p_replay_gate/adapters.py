@@ -1,11 +1,13 @@
 from __future__ import annotations
 
 import csv
+import gzip
 import json
 import re
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
+from xml.etree import ElementTree as ET
 
 from .io import group_events, write_json
 from .models import EVENT_TYPES, FLOW_TYPES, P2PEvent
@@ -37,6 +39,21 @@ ACTIVITY_PATTERNS: tuple[tuple[str, tuple[str, ...]], ...] = (
     ("payment_cleared", ("payment cleared", "clear invoice", "clear payment", "pay invoice", "payment sent")),
     ("reversal", ("reverse", "reversal", "cancel invoice", "cancel payment", "credit memo")),
 )
+
+STANDARD_COLUMN_MAP = {
+    "case_id": "case_id",
+    "event_id": "event_id",
+    "timestamp": "timestamp",
+    "activity": "activity",
+    "event_type": "event_type",
+    "po_id": "po_id",
+    "line_id": "line_id",
+    "vendor_id": "vendor_id",
+    "invoice_id": "invoice_id",
+    "amount": "amount",
+    "quantity": "quantity",
+    "actor": "actor",
+}
 
 
 @dataclass(frozen=True)
@@ -112,6 +129,58 @@ def import_csv_events(
         unmapped_activities=unmapped,
         row_errors=row_errors,
         column_map=column_map,
+    )
+    if report_path:
+        write_json(report_path, stats.to_dict())
+    return stats
+
+
+def import_xes_events(
+    input_path: Path,
+    output_path: Path,
+    *,
+    activity_map_path: Path | None = None,
+    report_path: Path | None = None,
+    strict: bool = False,
+) -> ImportStats:
+    activity_map = _load_activity_map(activity_map_path)
+    row_count = 0
+    skipped_rows = 0
+    unmapped: dict[str, int] = {}
+    row_errors: dict[str, int] = {}
+    events: list[P2PEvent] = []
+    for row_count, row in enumerate(_xes_rows(input_path), start=1):
+        event_type = _event_type(row, STANDARD_COLUMN_MAP, activity_map)
+        if event_type is None:
+            activity = row.get("activity") or row.get("event_type") or "<missing>"
+            unmapped[activity] = unmapped.get(activity, 0) + 1
+            skipped_rows += 1
+            continue
+        try:
+            events.append(_event_from_row(row, row_count, STANDARD_COLUMN_MAP, event_type))
+        except ValueError as exc:
+            label = str(exc)
+            row_errors[label] = row_errors.get(label, 0) + 1
+            skipped_rows += 1
+
+    if strict and (unmapped or row_errors):
+        labels = []
+        labels.extend(f"unmapped {name} ({count})" for name, count in sorted(unmapped.items()))
+        labels.extend(f"row_error {name} ({count})" for name, count in sorted(row_errors.items()))
+        raise ValueError("; ".join(labels))
+
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    with output_path.open("w", encoding="utf-8") as handle:
+        for event in sorted(events, key=lambda item: (item.case_id, item.timestamp, item.event_id)):
+            handle.write(json.dumps(_event_to_dict(event), sort_keys=True) + "\n")
+
+    stats = ImportStats(
+        rows_read=row_count,
+        events_written=len(events),
+        skipped_rows=skipped_rows,
+        unmapped_activities=unmapped,
+        row_errors=row_errors,
+        column_map=STANDARD_COLUMN_MAP,
     )
     if report_path:
         write_json(report_path, stats.to_dict())
@@ -297,3 +366,76 @@ def _norm_column(value: str) -> str:
 
 def _norm_activity(value: str) -> str:
     return re.sub(r"\s+", " ", re.sub(r"[^a-z0-9]+", " ", value.lower())).strip()
+
+
+def _xes_rows(path: Path):
+    for trace_attrs, event_attrs in _iter_xes(path):
+        yield {
+            "case_id": _pick(trace_attrs, "concept:name", "case:concept:name"),
+            "event_id": _pick(event_attrs, "identity:id", "event_id", "event:id"),
+            "timestamp": _pick(event_attrs, "time:timestamp", "timestamp"),
+            "activity": _pick(event_attrs, "concept:name", "activity"),
+            "event_type": _pick(event_attrs, "event_type", "p2p_event_type"),
+            "po_id": _pick(event_attrs, "Purchasing Document", "po_id", "purchase_order")
+            or _pick(trace_attrs, "Purchasing Document", "case:Purchasing Document", "po_id", "purchase_order"),
+            "line_id": _pick(event_attrs, "Item", "Item ID", "line_id", "item")
+            or _pick(trace_attrs, "Item", "Item ID", "case:Item", "line_id", "item"),
+            "vendor_id": _pick(event_attrs, "Vendor", "Supplier", "vendor_id", "supplier")
+            or _pick(trace_attrs, "Vendor", "Supplier", "case:Vendor", "vendor_id", "supplier"),
+            "invoice_id": _pick(event_attrs, "Invoice", "Invoice ID", "Document", "Document ID", "invoice_id"),
+            "amount": _pick(event_attrs, "amount", "Amount", "Net value", "Cumulative net worth (EUR)")
+            or _pick(trace_attrs, "amount", "Amount", "Net value", "Cumulative net worth (EUR)", "case:Cumulative net worth (EUR)"),
+            "quantity": _pick(event_attrs, "quantity", "Quantity", "qty") or _pick(trace_attrs, "quantity", "Quantity", "qty"),
+            "actor": _pick(event_attrs, "org:resource", "resource", "user", "User"),
+        }
+
+
+def _iter_xes(path: Path):
+    trace_attrs: dict[str, str] = {}
+    event_attrs: dict[str, str] | None = None
+    in_trace = False
+    with _open_xes(path) as handle:
+        for action, elem in ET.iterparse(handle, events=("start", "end")):
+            tag = _local_name(elem.tag)
+            if action == "start":
+                if tag == "trace":
+                    trace_attrs = {}
+                    in_trace = True
+                elif tag == "event":
+                    event_attrs = {}
+                continue
+            if tag in {"string", "date", "int", "float", "boolean", "id"}:
+                key = elem.attrib.get("key")
+                value = elem.attrib.get("value")
+                if key and value is not None:
+                    if event_attrs is not None:
+                        event_attrs[key] = value
+                    elif in_trace:
+                        trace_attrs[key] = value
+            elif tag == "event":
+                if event_attrs is not None:
+                    yield dict(trace_attrs), dict(event_attrs)
+                event_attrs = None
+                elem.clear()
+            elif tag == "trace":
+                in_trace = False
+                trace_attrs = {}
+                elem.clear()
+
+
+def _open_xes(path: Path):
+    if path.suffix == ".gz" or "".join(path.suffixes[-2:]) == ".xes.gz":
+        return gzip.open(path, "rb")
+    return path.open("rb")
+
+
+def _local_name(tag: str) -> str:
+    return tag.rsplit("}", 1)[-1]
+
+
+def _pick(data: dict[str, str], *keys: str) -> str | None:
+    for key in keys:
+        value = data.get(key)
+        if value is not None and str(value).strip():
+            return str(value).strip()
+    return None

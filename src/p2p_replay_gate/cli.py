@@ -5,7 +5,7 @@ import sys
 from pathlib import Path
 from typing import Any
 
-from .adapters import import_csv_events, write_policy_template
+from .adapters import import_csv_events, import_xes_events, write_policy_template
 from .fixture import write_fixture
 from .io import group_events, load_events, load_policy, load_scenarios, read_json, write_json
 from .oracle import replay_case
@@ -45,6 +45,14 @@ def main(argv: list[str] | None = None) -> int:
     import_parser.add_argument("--report", type=Path, default=None, help="optional adapter report JSON path")
     import_parser.add_argument("--strict", action="store_true", help="fail when any source activity is unmapped")
     import_parser.set_defaults(func=_import_csv)
+
+    xes_parser = subparsers.add_parser("import-xes", help="convert an XES event log into P2P JSONL")
+    xes_parser.add_argument("--input", type=Path, required=True, help="source event log .xes or .xes.gz")
+    xes_parser.add_argument("--output", type=Path, required=True, help="output JSONL path")
+    xes_parser.add_argument("--activity-map", type=Path, default=None, help="optional JSON map from source activity to P2P event_type")
+    xes_parser.add_argument("--report", type=Path, default=None, help="optional adapter report JSON path")
+    xes_parser.add_argument("--strict", action="store_true", help="fail when any source activity is unmapped")
+    xes_parser.set_defaults(func=_import_xes)
 
     policy_parser = subparsers.add_parser("policy-template", help="write a policy skeleton for imported traces")
     policy_parser.add_argument("--events", type=Path, required=True, help="imported event log JSONL")
@@ -150,6 +158,31 @@ def _inspect(args: argparse.Namespace) -> int:
 
 def _import_csv(args: argparse.Namespace) -> int:
     stats = import_csv_events(
+        args.input,
+        args.output,
+        activity_map_path=args.activity_map,
+        report_path=args.report,
+        strict=args.strict,
+    )
+    print(
+        f"imported: rows={stats.rows_read} "
+        f"events={stats.events_written} "
+        f"skipped={stats.skipped_rows} "
+        f"output={args.output}"
+    )
+    if stats.unmapped_activities:
+        print("unmapped activities:")
+        for activity, count in sorted(stats.unmapped_activities.items()):
+            print(f"- {activity}: {count}")
+    if stats.row_errors:
+        print("row errors:")
+        for error, count in sorted(stats.row_errors.items()):
+            print(f"- {error}: {count}")
+    return 0
+
+
+def _import_xes(args: argparse.Namespace) -> int:
+    stats = import_xes_events(
         args.input,
         args.output,
         activity_map_path=args.activity_map,

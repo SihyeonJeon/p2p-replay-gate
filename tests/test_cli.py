@@ -7,7 +7,7 @@ import unittest
 from pathlib import Path
 
 from p2p_replay_gate.cli import main
-from p2p_replay_gate.io import read_json, write_json
+from p2p_replay_gate.io import load_events, read_json, write_json
 
 
 class CliTests(unittest.TestCase):
@@ -114,6 +114,22 @@ class CliTests(unittest.TestCase):
         code, _, _ = self._main(["audit", "--events", str(jsonl_path), "--policy", str(policy_path), "--output", str(audit_path)])
         self.assertEqual(0, code)
         self.assertEqual(1, read_json(audit_path)["summary"]["trace_count"])
+
+    def test_import_xes_command(self) -> None:
+        xes_path = self.root / "events.xes"
+        jsonl_path = self.root / "events.jsonl"
+        xes_path.write_text(
+            '<?xml version="1.0" encoding="UTF-8" ?><log xmlns="http://www.xes-standard.org/">'
+            '<trace><string key="concept:name" value="C901"/>'
+            '<string key="Purchasing Document" value="PO-C901"/><string key="Vendor" value="V91"/>'
+            '<float key="Cumulative net worth (EUR)" value="300"/><float key="Quantity" value="1"/>'
+            '<event><string key="concept:name" value="Create Purchase Order"/>'
+            '<date key="time:timestamp" value="2026-01-01T09:00:00Z"/></event></trace></log>',
+            encoding="utf-8",
+        )
+        code, _, _ = self._main(["import-xes", "--input", str(xes_path), "--output", str(jsonl_path), "--strict"])
+        self.assertEqual(0, code)
+        self.assertEqual("po_created", load_events(jsonl_path)[0].event_type)
 
 
 if __name__ == "__main__":

@@ -234,8 +234,9 @@ p2p-replay-gate run --events data/scenarios/base_events.jsonl --scenario-pack da
 
     <section>
       <h2>External Log Path</h2>
-      <p class="note">CSV import keeps the public repo usable without redistributing proprietary or benchmark event logs. Policy templates block missing amount data by default.</p>
+      <p class="note">CSV/XES import keeps the public repo usable without redistributing proprietary or benchmark event logs. Policy templates block missing amount data by default.</p>
       <div class="command" style="margin-top:14px">p2p-replay-gate import-csv --input events.csv --output imported/events.jsonl --report imported/adapter_report.json
+p2p-replay-gate import-xes --input events.xes --output imported/events.jsonl --strict
 p2p-replay-gate policy-template --events imported/events.jsonl --output imported/policy.json --flow-type three_way_gr_based
 p2p-replay-gate audit --events imported/events.jsonl --policy imported/policy.json --output imported/audit.json</div>
     </section>

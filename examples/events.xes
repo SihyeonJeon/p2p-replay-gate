@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<log xes.version="1.0" xes.features="nested-attributes" xmlns="http://www.xes-standard.org/">
+  <trace>
+    <string key="concept:name" value="C100"/>
+    <string key="Purchasing Document" value="PO-C100"/>
+    <string key="Vendor" value="V01"/>
+    <float key="Cumulative net worth (EUR)" value="1250"/>
+    <float key="Quantity" value="10"/>
+    <event>
+      <string key="concept:name" value="Create Purchase Order"/>
+      <date key="time:timestamp" value="2026-01-01T09:00:00Z"/>
+      <string key="org:resource" value="buyer"/>
+    </event>
+    <event>
+      <string key="concept:name" value="Record Goods Receipt"/>
+      <date key="time:timestamp" value="2026-01-02T09:00:00Z"/>
+      <string key="org:resource" value="warehouse"/>
+    </event>
+    <event>
+      <string key="concept:name" value="Record Invoice Receipt"/>
+      <date key="time:timestamp" value="2026-01-03T09:00:00Z"/>
+      <string key="Invoice" value="INV-C100"/>
+      <string key="org:resource" value="ap"/>
+    </event>
+    <event>
+      <string key="concept:name" value="Manager Approved"/>
+      <date key="time:timestamp" value="2026-01-04T09:00:00Z"/>
+      <string key="Invoice" value="INV-C100"/>
+      <string key="org:resource" value="manager"/>
+    </event>
+    <event>
+      <string key="concept:name" value="Clear Payment"/>
+      <date key="time:timestamp" value="2026-01-05T09:00:00Z"/>
+      <string key="Invoice" value="INV-C100"/>
+      <string key="org:resource" value="batch"/>
+    </event>
+  </trace>
+</log>

@@ -4,7 +4,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from p2p_replay_gate.adapters import import_csv_events, write_policy_template
+from p2p_replay_gate.adapters import import_csv_events, import_xes_events, write_policy_template
 from p2p_replay_gate.io import load_events, read_json
 
 
@@ -26,6 +26,32 @@ C200,invoice_received,2026-01-03T09:00:00Z,PO-C200,V02,50,1
 CSV_NO_AMOUNT = """case_id,event_type,timestamp,po_id,vendor_id
 C300,po_created,2026-01-01T09:00:00Z,PO-C300,V03
 C300,invoice_received,2026-01-02T09:00:00Z,PO-C300,V03
+"""
+
+XES_TEXT = """<?xml version="1.0" encoding="UTF-8" ?>
+<log xmlns="http://www.xes-standard.org/">
+  <trace>
+    <string key="concept:name" value="C500"/>
+    <string key="Purchasing Document" value="PO-C500"/>
+    <string key="Vendor" value="V05"/>
+    <float key="Cumulative net worth (EUR)" value="700"/>
+    <float key="Quantity" value="7"/>
+    <event>
+      <string key="concept:name" value="Create Purchase Order"/>
+      <date key="time:timestamp" value="2026-02-01T09:00:00Z"/>
+    </event>
+    <event>
+      <string key="concept:name" value="Record Invoice Receipt"/>
+      <date key="time:timestamp" value="2026-02-02T09:00:00Z"/>
+      <string key="Invoice" value="INV-C500"/>
+    </event>
+    <event>
+      <string key="concept:name" value="Clear Payment"/>
+      <date key="time:timestamp" value="2026-02-03T09:00:00Z"/>
+      <string key="Invoice" value="INV-C500"/>
+    </event>
+  </trace>
+</log>
 """
 
 
@@ -95,6 +121,17 @@ class AdapterTests(unittest.TestCase):
         import_csv_events(csv_path, self.jsonl_path, strict=True)
         policies = write_policy_template(load_events(self.jsonl_path), self.root / "policy.json", allow_missing_amount=True)
         self.assertIn("po_amount defaulted", policies[0]["template_warnings"][0])
+
+    def test_import_xes_maps_trace_and_event_attributes(self) -> None:
+        xes_path = self.root / "events.xes"
+        xes_path.write_text(XES_TEXT, encoding="utf-8")
+        stats = import_xes_events(xes_path, self.jsonl_path, strict=True)
+        events = load_events(self.jsonl_path)
+        self.assertEqual(3, stats.events_written)
+        self.assertEqual(["po_created", "invoice_received", "payment_cleared"], [event.event_type for event in events])
+        self.assertEqual("PO-C500", events[0].po_id)
+        self.assertEqual("V05", events[0].vendor_id)
+        self.assertEqual(700.0, events[0].amount)
 
 
 if __name__ == "__main__":
