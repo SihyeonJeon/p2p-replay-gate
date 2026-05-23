@@ -25,7 +25,7 @@ Fixture v0
 | duplicate catch recall | 1.000 |
 | false holds on clean traces | 0 |
 
-Visual summary: `docs/index.html`
+Visual summary: <https://sihyeonjeon.github.io/p2p-replay-gate/>
 
 ## Run
 
