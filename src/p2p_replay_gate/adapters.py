@@ -3,7 +3,9 @@ from __future__ import annotations
 import csv
 import gzip
 import json
+import os
 import re
+import tempfile
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
@@ -94,6 +96,8 @@ def import_csv_events(
     activity_map: dict[str, str] | None = None,
 ) -> ImportStats:
     activity_map = activity_map or _load_activity_map(activity_map_path)
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    temp_path: Path | None = None
     with input_path.open("r", encoding="utf-8-sig", newline="") as handle:
         reader = csv.DictReader(handle)
         if not reader.fieldnames:
@@ -105,35 +109,44 @@ def import_csv_events(
         skipped_rows = 0
         unmapped: dict[str, int] = {}
         row_errors: dict[str, int] = {}
-        events: list[P2PEvent] = []
-        for row_count, row in enumerate(reader, start=1):
-            event_type = _event_type(row, column_map, activity_map)
-            if event_type is None:
-                activity = _value(row, column_map, "activity") or _value(row, column_map, "event_type") or "<missing>"
-                unmapped[activity] = unmapped.get(activity, 0) + 1
-                skipped_rows += 1
-                continue
-            try:
-                events.append(_event_from_row(row, row_count, column_map, event_type))
-            except ValueError as exc:
-                label = str(exc)
-                row_errors[label] = row_errors.get(label, 0) + 1
-                skipped_rows += 1
+        events_written = 0
+        try:
+            with tempfile.NamedTemporaryFile(
+                "w",
+                encoding="utf-8",
+                dir=output_path.parent,
+                prefix=f"{output_path.name}.",
+                suffix=".tmp",
+                delete=False,
+            ) as output:
+                temp_path = Path(output.name)
+                for row_count, row in enumerate(reader, start=1):
+                    event_type = _event_type(row, column_map, activity_map)
+                    if event_type is None:
+                        activity = _value(row, column_map, "activity") or _value(row, column_map, "event_type") or "<missing>"
+                        unmapped[activity] = unmapped.get(activity, 0) + 1
+                        skipped_rows += 1
+                        continue
+                    try:
+                        event = _event_from_row(row, row_count, column_map, event_type)
+                    except ValueError as exc:
+                        label = str(exc)
+                        row_errors[label] = row_errors.get(label, 0) + 1
+                        skipped_rows += 1
+                        continue
+                    output.write(json.dumps(_event_to_dict(event), sort_keys=True) + "\n")
+                    events_written += 1
 
-    if strict and (unmapped or row_errors):
-        labels = []
-        labels.extend(f"unmapped {name} ({count})" for name, count in sorted(unmapped.items()))
-        labels.extend(f"row_error {name} ({count})" for name, count in sorted(row_errors.items()))
-        raise ValueError("; ".join(labels))
-
-    output_path.parent.mkdir(parents=True, exist_ok=True)
-    with output_path.open("w", encoding="utf-8") as handle:
-        for event in sorted(events, key=lambda item: (item.case_id, item.timestamp, item.event_id)):
-            handle.write(json.dumps(_event_to_dict(event), sort_keys=True) + "\n")
+            _raise_strict_errors(strict, unmapped, row_errors)
+            os.replace(temp_path, output_path)
+            temp_path = None
+        finally:
+            if temp_path is not None:
+                temp_path.unlink(missing_ok=True)
 
     stats = ImportStats(
         rows_read=row_count,
-        events_written=len(events),
+        events_written=events_written,
         skipped_rows=skipped_rows,
         unmapped_activities=unmapped,
         row_errors=row_errors,
@@ -154,39 +167,50 @@ def import_xes_events(
     activity_map: dict[str, str] | None = None,
 ) -> ImportStats:
     activity_map = activity_map or _load_activity_map(activity_map_path)
+    output_path.parent.mkdir(parents=True, exist_ok=True)
     row_count = 0
     skipped_rows = 0
     unmapped: dict[str, int] = {}
     row_errors: dict[str, int] = {}
-    events: list[P2PEvent] = []
-    for row_count, row in enumerate(_xes_rows(input_path), start=1):
-        event_type = _event_type(row, STANDARD_COLUMN_MAP, activity_map)
-        if event_type is None:
-            activity = row.get("activity") or row.get("event_type") or "<missing>"
-            unmapped[activity] = unmapped.get(activity, 0) + 1
-            skipped_rows += 1
-            continue
-        try:
-            events.append(_event_from_row(row, row_count, STANDARD_COLUMN_MAP, event_type))
-        except ValueError as exc:
-            label = str(exc)
-            row_errors[label] = row_errors.get(label, 0) + 1
-            skipped_rows += 1
+    events_written = 0
+    temp_path: Path | None = None
+    try:
+        with tempfile.NamedTemporaryFile(
+            "w",
+            encoding="utf-8",
+            dir=output_path.parent,
+            prefix=f"{output_path.name}.",
+            suffix=".tmp",
+            delete=False,
+        ) as output:
+            temp_path = Path(output.name)
+            for row_count, row in enumerate(_xes_rows(input_path), start=1):
+                event_type = _event_type(row, STANDARD_COLUMN_MAP, activity_map)
+                if event_type is None:
+                    activity = row.get("activity") or row.get("event_type") or "<missing>"
+                    unmapped[activity] = unmapped.get(activity, 0) + 1
+                    skipped_rows += 1
+                    continue
+                try:
+                    event = _event_from_row(row, row_count, STANDARD_COLUMN_MAP, event_type)
+                except ValueError as exc:
+                    label = str(exc)
+                    row_errors[label] = row_errors.get(label, 0) + 1
+                    skipped_rows += 1
+                    continue
+                output.write(json.dumps(_event_to_dict(event), sort_keys=True) + "\n")
+                events_written += 1
 
-    if strict and (unmapped or row_errors):
-        labels = []
-        labels.extend(f"unmapped {name} ({count})" for name, count in sorted(unmapped.items()))
-        labels.extend(f"row_error {name} ({count})" for name, count in sorted(row_errors.items()))
-        raise ValueError("; ".join(labels))
-
-    output_path.parent.mkdir(parents=True, exist_ok=True)
-    with output_path.open("w", encoding="utf-8") as handle:
-        for event in sorted(events, key=lambda item: (item.case_id, item.timestamp, item.event_id)):
-            handle.write(json.dumps(_event_to_dict(event), sort_keys=True) + "\n")
+        _raise_strict_errors(strict, unmapped, row_errors)
+        os.replace(temp_path, output_path)
+        temp_path = None
+    finally:
+        if temp_path is not None:
+            temp_path.unlink(missing_ok=True)
 
     stats = ImportStats(
         rows_read=row_count,
-        events_written=len(events),
+        events_written=events_written,
         skipped_rows=skipped_rows,
         unmapped_activities=unmapped,
         row_errors=row_errors,
@@ -324,6 +348,15 @@ def normalize_activity_map(data: dict[str, Any], source_label: str = "activity_m
             raise ValueError(f"{source_label}: unknown target event_type for {source}: {target}")
         mapping[_norm_activity(str(source))] = target
     return mapping
+
+
+def _raise_strict_errors(strict: bool, unmapped: dict[str, int], row_errors: dict[str, int]) -> None:
+    if not strict or not (unmapped or row_errors):
+        return
+    labels = []
+    labels.extend(f"unmapped {name} ({count})" for name, count in sorted(unmapped.items()))
+    labels.extend(f"row_error {name} ({count})" for name, count in sorted(row_errors.items()))
+    raise ValueError("; ".join(labels))
 
 
 def _value(row: dict[str, str], column_map: dict[str, str], target: str) -> str | None:

@@ -7,7 +7,7 @@ Invoice agents fail when documents disagree: duplicate invoices, partial receipt
 ## What it does
 
 - replays P2P traces from JSONL
-- imports process-mining style CSV or XES event logs into the replay format
+- streams process-mining style CSV or XES event logs into the replay format
 - writes a policy skeleton for imported traces
 - injects seeded procurement defects
 - checks 2-way, 3-way, consignment, approval, duplicate, and payment-hold rules
