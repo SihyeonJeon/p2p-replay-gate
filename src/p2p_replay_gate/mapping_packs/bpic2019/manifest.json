@@ -1,0 +1,32 @@
+{
+  "name": "bpic2019",
+  "title": "BPIC2019 purchase-to-pay mapping pack",
+  "source": "BPI Challenge 2019 purchase order handling event log",
+  "source_url": "https://icpmconference.org/2019/icpm-2019/contests-challenges/bpi-challenge-2019/",
+  "dataset_policy": "The public dataset is not redistributed. Download it from the official source, then run import-xes or import-csv with --pack bpic2019.",
+  "case_key": "concept:name",
+  "flow_inference": {
+    "three_way_gr_based": "Goods Receipt=true and GR-Based Inv. Verif.=true",
+    "three_way_invoice_before_gr": "Goods Receipt=true and GR-Based Inv. Verif.=false",
+    "two_way": "Goods Receipt=false",
+    "consignment": "Item Category or Document Type contains consignment"
+  },
+  "required_for_policy_template": [
+    "concept:name",
+    "time:timestamp",
+    "concept:name activity",
+    "Purchasing Document",
+    "Vendor",
+    "Cumulative net worth (EUR)",
+    "Quantity",
+    "Goods Receipt",
+    "GR-Based Inv. Verif.",
+    "Item Category"
+  ],
+  "notes": [
+    "Run once with --report, review unmapped activities, then rerun with --strict after the audit scope is fixed.",
+    "policy-template --flow-type auto uses BPIC2019 trace attributes to choose the replay policy type.",
+    "Vendor creates invoice is left unmapped by default because Record Invoice Receipt is the accounting evidence used by the replay oracle.",
+    "BPIC2019 does not expose the full PO or invoice approval workflow; use a high --approval-limit unless you supply approval evidence through a custom activity map."
+  ]
+}

@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<log xmlns="http://www.xes-standard.org/">
+  <trace>
+    <string key="concept:name" value="BPIC19-450000001-00010"/>
+    <string key="Purchasing Document" value="450000001"/>
+    <string key="Item" value="00010"/>
+    <string key="Vendor" value="VENDOR-001"/>
+    <string key="Item Category" value="3-way match, invoice after GR"/>
+    <boolean key="Goods Receipt" value="true"/>
+    <boolean key="GR-Based Inv. Verif." value="true"/>
+    <float key="Cumulative net worth (EUR)" value="1250.00"/>
+    <float key="Quantity" value="10"/>
+    <event>
+      <string key="concept:name" value="Create Purchase Order Item"/>
+      <date key="time:timestamp" value="2018-01-03T08:30:00.000+00:00"/>
+      <string key="org:resource" value="batch"/>
+    </event>
+    <event>
+      <string key="concept:name" value="Record Goods Receipt"/>
+      <date key="time:timestamp" value="2018-01-08T09:12:00.000+00:00"/>
+      <string key="org:resource" value="user_058"/>
+    </event>
+    <event>
+      <string key="concept:name" value="Record Invoice Receipt"/>
+      <date key="time:timestamp" value="2018-01-11T10:02:00.000+00:00"/>
+      <string key="Invoice" value="510000001"/>
+      <string key="org:resource" value="batch"/>
+    </event>
+    <event>
+      <string key="concept:name" value="Clear Invoice"/>
+      <date key="time:timestamp" value="2018-02-01T04:00:00.000+00:00"/>
+      <string key="Invoice" value="510000001"/>
+    </event>
+  </trace>
+</log>

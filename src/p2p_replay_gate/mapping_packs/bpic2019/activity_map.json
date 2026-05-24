@@ -1,0 +1,18 @@
+{
+  "Create Purchase Order Item": "po_created",
+  "Create Purchase Requisition Item": "po_created",
+  "Change Price": "po_created",
+  "Change Quantity": "po_created",
+  "Record Goods Receipt": "goods_receipt",
+  "Record Service Entry Sheet": "goods_receipt",
+  "Record Invoice Receipt": "invoice_received",
+  "Record Subsequent Invoice": "invoice_received",
+  "Block Purchase Order Item": "invoice_blocked",
+  "Remove Payment Block": "invoice_released",
+  "Clear Invoice": "payment_cleared",
+  "Cancel Goods Receipt": "reversal",
+  "Cancel Invoice Receipt": "reversal",
+  "Cancel Subsequent Invoice": "reversal",
+  "Vendor creates debit memo": "reversal",
+  "Delete Purchase Order Item": "reversal"
+}

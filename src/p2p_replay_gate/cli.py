@@ -1,14 +1,16 @@
 from __future__ import annotations
 
 import argparse
+import json
 import sys
 from pathlib import Path
 from typing import Any
 
-from .adapters import import_csv_events, import_xes_events, write_policy_template
+from .adapters import import_csv_events, import_xes_events, normalize_activity_map, write_policy_template
 from .fixture import write_fixture
 from .io import group_events, load_events, load_policy, load_scenarios, read_json, write_json
 from .oracle import replay_case
+from .packs import load_activity_map, load_manifest
 from .report import build_audit_report, build_report
 from .scenario import validate_scenario_expectations
 
@@ -42,6 +44,7 @@ def main(argv: list[str] | None = None) -> int:
     import_parser.add_argument("--input", type=Path, required=True, help="source event log CSV")
     import_parser.add_argument("--output", type=Path, required=True, help="output JSONL path")
     import_parser.add_argument("--activity-map", type=Path, default=None, help="optional JSON map from source activity to P2P event_type")
+    import_parser.add_argument("--pack", default=None, help="bundled mapping pack name, for example bpic2019")
     import_parser.add_argument("--report", type=Path, default=None, help="optional adapter report JSON path")
     import_parser.add_argument("--strict", action="store_true", help="fail when any source activity is unmapped")
     import_parser.set_defaults(func=_import_csv)
@@ -50,6 +53,7 @@ def main(argv: list[str] | None = None) -> int:
     xes_parser.add_argument("--input", type=Path, required=True, help="source event log .xes or .xes.gz")
     xes_parser.add_argument("--output", type=Path, required=True, help="output JSONL path")
     xes_parser.add_argument("--activity-map", type=Path, default=None, help="optional JSON map from source activity to P2P event_type")
+    xes_parser.add_argument("--pack", default=None, help="bundled mapping pack name, for example bpic2019")
     xes_parser.add_argument("--report", type=Path, default=None, help="optional adapter report JSON path")
     xes_parser.add_argument("--strict", action="store_true", help="fail when any source activity is unmapped")
     xes_parser.set_defaults(func=_import_xes)
@@ -67,6 +71,10 @@ def main(argv: list[str] | None = None) -> int:
     audit_parser.add_argument("--policy", type=Path, required=True, help="case policy JSON")
     audit_parser.add_argument("--output", type=Path, default=Path("reports/audit.json"), help="audit report output path")
     audit_parser.set_defaults(func=_audit)
+
+    pack_parser = subparsers.add_parser("pack-info", help="print bundled mapping pack metadata")
+    pack_parser.add_argument("pack", help="mapping pack name, for example bpic2019")
+    pack_parser.set_defaults(func=_pack_info)
 
     args = parser.parse_args(argv)
     try:
@@ -161,6 +169,7 @@ def _import_csv(args: argparse.Namespace) -> int:
         args.input,
         args.output,
         activity_map_path=args.activity_map,
+        activity_map=_activity_map(args),
         report_path=args.report,
         strict=args.strict,
     )
@@ -186,6 +195,7 @@ def _import_xes(args: argparse.Namespace) -> int:
         args.input,
         args.output,
         activity_map_path=args.activity_map,
+        activity_map=_activity_map(args),
         report_path=args.report,
         strict=args.strict,
     )
@@ -232,6 +242,23 @@ def _audit(args: argparse.Namespace) -> int:
         f"missing_policy={summary['missing_policy_count']}"
     )
     return int(summary["exit_code"])
+
+
+def _pack_info(args: argparse.Namespace) -> int:
+    print(json.dumps(load_manifest(args.pack), indent=2, sort_keys=True))
+    return 0
+
+
+def _activity_map(args: argparse.Namespace) -> dict[str, str] | None:
+    mapping: dict[str, str] = {}
+    if args.pack:
+        mapping.update(load_activity_map(args.pack))
+    if args.activity_map:
+        data = read_json(args.activity_map)
+        if not isinstance(data, dict):
+            raise ValueError(f"{args.activity_map}: activity map must be a JSON object")
+        mapping.update(normalize_activity_map(data, str(args.activity_map)))
+    return mapping or None
 
 
 def _load_inputs(args: argparse.Namespace):

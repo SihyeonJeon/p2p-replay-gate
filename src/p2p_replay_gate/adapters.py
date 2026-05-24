@@ -26,6 +26,10 @@ COLUMN_ALIASES: dict[str, tuple[str, ...]] = {
     "amount": ("amount", "value", "case:amount", "invoice_amount", "po_amount", "net value"),
     "quantity": ("quantity", "qty", "case:quantity", "invoice_quantity", "po_quantity"),
     "actor": ("actor", "org:resource", "resource", "user", "agent"),
+    "item_category": ("item_category", "item category", "case:item category", "item type", "case:item type"),
+    "document_type": ("document_type", "document type", "case:document type"),
+    "goods_receipt": ("goods_receipt", "goods receipt", "case:goods receipt"),
+    "gr_based_inv_verif": ("gr_based_inv_verif", "gr-based inv. verif.", "case:gr-based inv. verif.", "gr based inv verif"),
 }
 
 
@@ -53,6 +57,10 @@ STANDARD_COLUMN_MAP = {
     "amount": "amount",
     "quantity": "quantity",
     "actor": "actor",
+    "item_category": "item_category",
+    "document_type": "document_type",
+    "goods_receipt": "goods_receipt",
+    "gr_based_inv_verif": "gr_based_inv_verif",
 }
 
 
@@ -83,8 +91,9 @@ def import_csv_events(
     activity_map_path: Path | None = None,
     report_path: Path | None = None,
     strict: bool = False,
+    activity_map: dict[str, str] | None = None,
 ) -> ImportStats:
-    activity_map = _load_activity_map(activity_map_path)
+    activity_map = activity_map or _load_activity_map(activity_map_path)
     with input_path.open("r", encoding="utf-8-sig", newline="") as handle:
         reader = csv.DictReader(handle)
         if not reader.fieldnames:
@@ -142,8 +151,9 @@ def import_xes_events(
     activity_map_path: Path | None = None,
     report_path: Path | None = None,
     strict: bool = False,
+    activity_map: dict[str, str] | None = None,
 ) -> ImportStats:
-    activity_map = _load_activity_map(activity_map_path)
+    activity_map = activity_map or _load_activity_map(activity_map_path)
     row_count = 0
     skipped_rows = 0
     unmapped: dict[str, int] = {}
@@ -195,7 +205,7 @@ def write_policy_template(
     approval_limit: float = 1000.0,
     allow_missing_amount: bool = False,
 ) -> list[dict[str, Any]]:
-    if flow_type not in FLOW_TYPES:
+    if flow_type != "auto" and flow_type not in FLOW_TYPES:
         raise ValueError(f"unknown flow_type: {flow_type}")
     policies: list[dict[str, Any]] = []
     for case_id, case_events in sorted(group_events(events).items()):
@@ -213,9 +223,12 @@ def write_policy_template(
             warnings.append("po_quantity defaulted to 0.0 because no quantity data was present")
         if first.vendor_id == "UNKNOWN":
             warnings.append("vendor_id defaulted to UNKNOWN because no vendor column was present")
+        case_flow_type = _case_flow_type(case_events, flow_type)
+        if case_flow_type == "auto":
+            raise ValueError(f"{case_id}: cannot infer flow_type; pass an explicit --flow-type")
         policies.append({
             "case_id": case_id,
-            "flow_type": flow_type,
+            "flow_type": case_flow_type,
             "po_amount": po_amount,
             "po_quantity": po_quantity,
             "vendor_id": first.vendor_id,
@@ -270,6 +283,13 @@ def _event_from_row(row: dict[str, str], source_row: int, column_map: dict[str, 
         "source_row": source_row,
         "source_activity": activity,
     }
+    for target in ("item_category", "document_type", "goods_receipt", "gr_based_inv_verif"):
+        value = _value(row, column_map, target)
+        if value is not None:
+            attrs[f"source_{target}"] = value
+    flow_hint = _infer_flow_type_from_row(row, column_map)
+    if flow_hint is not None:
+        attrs["flow_hint"] = flow_hint
     return P2PEvent(
         case_id=case_id,
         event_id=event_id,
@@ -291,11 +311,17 @@ def _load_activity_map(path: Path | None) -> dict[str, str]:
         return {}
     with path.open("r", encoding="utf-8") as handle:
         data = json.load(handle)
+    return normalize_activity_map(data, str(path))
+
+
+def normalize_activity_map(data: dict[str, Any], source_label: str = "activity_map") -> dict[str, str]:
+    if not isinstance(data, dict):
+        raise ValueError(f"{source_label}: activity map must be a JSON object")
     mapping = {}
     for source, target in data.items():
         target = str(target)
         if target not in EVENT_TYPES:
-            raise ValueError(f"{path}: unknown target event_type for {source}: {target}")
+            raise ValueError(f"{source_label}: unknown target event_type for {source}: {target}")
         mapping[_norm_activity(str(source))] = target
     return mapping
 
@@ -343,6 +369,50 @@ def _first_quantity(events: list[P2PEvent]) -> float | None:
     return None
 
 
+def _case_flow_type(events: list[P2PEvent], requested: str) -> str:
+    if requested != "auto":
+        return requested
+    for event in events:
+        flow_hint = event.attrs.get("flow_hint")
+        if isinstance(flow_hint, str) and flow_hint in FLOW_TYPES:
+            return flow_hint
+    return "auto"
+
+
+def _infer_flow_type_from_row(row: dict[str, str], column_map: dict[str, str]) -> str | None:
+    item_category = _norm_activity(_value(row, column_map, "item_category") or "")
+    document_type = _norm_activity(_value(row, column_map, "document_type") or "")
+    category_text = f"{item_category} {document_type}"
+    if "consignment" in category_text:
+        return "consignment"
+    goods_receipt = _truthy_flag(_value(row, column_map, "goods_receipt"))
+    gr_based = _truthy_flag(_value(row, column_map, "gr_based_inv_verif"))
+    if goods_receipt is False:
+        return "two_way"
+    if goods_receipt is True:
+        if gr_based is True:
+            return "three_way_gr_based"
+        return "three_way_invoice_before_gr"
+    if "2 way" in category_text or "two way" in category_text:
+        return "two_way"
+    if "3 way" in category_text:
+        if "gr based" in category_text:
+            return "three_way_gr_based"
+        return "three_way_invoice_before_gr"
+    return None
+
+
+def _truthy_flag(value: str | None) -> bool | None:
+    if value is None:
+        return None
+    normalized = _norm_activity(value)
+    if normalized in {"true", "yes", "y", "1", "x", "required", "gr"}:
+        return True
+    if normalized in {"false", "no", "n", "0", "none", "not required", "nan"}:
+        return False
+    return None
+
+
 def _event_to_dict(event: P2PEvent) -> dict[str, Any]:
     return {
         "case_id": event.case_id,
@@ -387,6 +457,10 @@ def _xes_rows(path: Path):
             or _pick(trace_attrs, "amount", "Amount", "Net value", "Cumulative net worth (EUR)", "case:Cumulative net worth (EUR)"),
             "quantity": _pick(event_attrs, "quantity", "Quantity", "qty") or _pick(trace_attrs, "quantity", "Quantity", "qty"),
             "actor": _pick(event_attrs, "org:resource", "resource", "user", "User"),
+            "item_category": _pick(trace_attrs, "Item Category", "case:Item Category", "Item Type", "case:Item Type", "item_category"),
+            "document_type": _pick(trace_attrs, "Document Type", "case:Document Type", "document_type"),
+            "goods_receipt": _pick(trace_attrs, "Goods Receipt", "case:Goods Receipt", "goods_receipt"),
+            "gr_based_inv_verif": _pick(trace_attrs, "GR-Based Inv. Verif.", "case:GR-Based Inv. Verif.", "gr_based_inv_verif"),
         }
 
 

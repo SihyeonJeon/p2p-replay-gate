@@ -22,7 +22,7 @@ Fixture v0
 | --- | ---: |
 | clean traces | 12 |
 | injected scenarios | 48 |
-| tests | 47 |
+| tests | 50 |
 | critical policy violations caught | 36/36 |
 | duplicate catch recall | 1.000 |
 | false holds on clean traces | 0 |
@@ -56,6 +56,15 @@ XES works the same way:
 p2p-replay-gate import-xes --input examples/events.xes --output imported/events.jsonl --strict
 ```
 
+BPIC2019 mapping pack:
+
+```bash
+p2p-replay-gate pack-info bpic2019
+p2p-replay-gate import-xes --pack bpic2019 --input examples/bpic2019_tiny.xes --output imported/bpic2019.jsonl --report imported/bpic2019_adapter.json --strict
+p2p-replay-gate policy-template --events imported/bpic2019.jsonl --output imported/bpic2019_policy.json --flow-type auto --approval-limit 1000000000
+p2p-replay-gate audit --events imported/bpic2019.jsonl --policy imported/bpic2019_policy.json --output imported/bpic2019_audit.json
+```
+
 Test:
 
 ```bash
@@ -64,4 +73,4 @@ PYTHONPATH=src python -m unittest discover -s tests -v
 
 ## Boundary
 
-Synthetic fixture evidence only. No real vendor, invoice, payment, or company data is included. The BPIC2019 source is a future adapter target, not redistributed here.
+Synthetic fixture evidence only. No real vendor, invoice, payment, or company data is included. BPIC2019 is supported as a mapping pack, but the source log is not redistributed here.

@@ -242,6 +242,16 @@ p2p-replay-gate audit --events imported/events.jsonl --policy imported/policy.js
     </section>
 
     <section>
+      <h2>BPIC2019 Pack</h2>
+      <p class="note">Bundled activity mapping for the public purchase-order handling log. The source dataset is not redistributed; the pack maps accounting evidence into replay events and infers 2-way, 3-way, invoice-before-GR, and consignment policies.</p>
+      <div class="command" style="margin-top:14px">p2p-replay-gate pack-info bpic2019
+p2p-replay-gate import-xes --pack bpic2019 --input BPI_Challenge_2019.xes.gz --output imported/bpic2019.jsonl --report imported/bpic2019_adapter.json
+p2p-replay-gate policy-template --events imported/bpic2019.jsonl --output imported/bpic2019_policy.json --flow-type auto --approval-limit 1000000000
+p2p-replay-gate audit --events imported/bpic2019.jsonl --policy imported/bpic2019_policy.json --output imported/bpic2019_audit.json</div>
+      <p class="note">Use the adapter report before making claims. Activities outside the replay oracle scope should remain visible as unmapped or be handled by a custom activity map. BPIC2019 does not expose the full approval workflow, so the pack keeps approval checks disabled unless custom evidence is supplied.</p>
+    </section>
+
+    <section>
       <h2>Replay Shape</h2>
       <p class="note">The gate tests workflow state, not only final labels.</p>
       <div class="flow" style="margin-top:14px">
