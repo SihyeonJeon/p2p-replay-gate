@@ -41,7 +41,7 @@ def replay_case(events: list[P2PEvent], policy: CasePolicy) -> CaseResult:
         if event.event_type == "po_created":
             state.po_created = True
         elif event.event_type == "goods_receipt":
-            state.received_amount += event.amount or 0.0
+            state.received_amount = _accumulate_amount(state.received_amount, event)
             state.received_quantity += event.quantity or 0.0
         elif event.event_type == "invoice_received":
             if event.invoice_id in state.invoice_ids:
@@ -49,7 +49,7 @@ def replay_case(events: list[P2PEvent], policy: CasePolicy) -> CaseResult:
             if policy.flow_type == "consignment":
                 violations.append(_violation("CONSIGNMENT_INVOICE", event, "consignment flow should not receive PO-level invoice", {"invoice_id": event.invoice_id}))
             state.invoice_ids.add(event.invoice_id or event.event_id)
-            state.invoice_amount += event.amount or 0.0
+            state.invoice_amount = _accumulate_amount(state.invoice_amount, event)
             state.invoice_quantity += event.quantity or 0.0
         elif event.event_type == "invoice_blocked":
             invoice_id = event.invoice_id or event.event_id
@@ -115,6 +115,13 @@ def _can_release_invoice(state: ReplayState, policy: CasePolicy) -> bool:
     if abs(state.invoice_quantity - policy.po_quantity) > policy.quantity_tolerance:
         return False
     return True
+
+
+def _accumulate_amount(current: float, event: P2PEvent) -> float:
+    amount = event.amount or 0.0
+    if event.attrs.get("amount_semantics") == "cumulative_net_worth":
+        return max(current, amount)
+    return current + amount
 
 
 def _audit_trace_complete(events: list[P2PEvent], state: ReplayState, policy: CasePolicy) -> bool:

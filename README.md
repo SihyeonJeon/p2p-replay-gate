@@ -22,12 +22,15 @@ Fixture v0
 | --- | ---: |
 | clean traces | 12 |
 | injected scenarios | 48 |
-| tests | 50 |
+| tests | 52 |
 | critical policy violations caught | 36/36 |
 | duplicate catch recall | 1.000 |
 | false holds on clean traces | 0 |
+| BPIC2019 smoke | 1,000 cases |
 
 Visual summary: <https://sihyeonjeon.github.io/p2p-replay-gate/>
+
+Real-log smoke summary: `reports/bpic2019_smoke_summary.json`
 
 ## Run
 
@@ -64,6 +67,8 @@ p2p-replay-gate import-xes --pack bpic2019 --input examples/bpic2019_tiny.xes --
 p2p-replay-gate policy-template --events imported/bpic2019.jsonl --output imported/bpic2019_policy.json --flow-type auto --approval-limit 1000000000
 p2p-replay-gate audit --events imported/bpic2019.jsonl --policy imported/bpic2019_policy.json --output imported/bpic2019_audit.json
 ```
+
+For the official full XES, start with `--max-cases 1000` and inspect `unmapped_activities`.
 
 Test:
 

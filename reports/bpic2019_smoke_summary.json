@@ -1,0 +1,51 @@
+{
+  "run_id": "bpic2019-real-xes-smoke-1000-cases",
+  "created_at": "2026-05-24",
+  "source": "BPI Challenge 2019",
+  "source_url": "https://data.4tu.nl/datasets/35ed7122-966a-484e-a0e1-749b64e3366d",
+  "source_file": {
+    "name": "BPI_Challenge_2019.xes",
+    "bytes": 728558522,
+    "md5": "4eb909242351193a61e1c15b9c3cc814"
+  },
+  "scope": {
+    "max_cases": 1000,
+    "dataset_redistributed": false,
+    "raw_data_path": "not committed"
+  },
+  "adapter": {
+    "rows_read": 15351,
+    "events_written": 10627,
+    "skipped_rows": 4724,
+    "row_errors": {},
+    "unmapped_activity_count": 17,
+    "largest_unmapped_activities": {
+      "Vendor creates invoice": 2049,
+      "SRM: In Transfer to Execution Syst.": 470,
+      "SRM: Complete": 409,
+      "SRM: Created": 409,
+      "SRM: Document Completed": 409,
+      "SRM: Ordered": 409,
+      "SRM: Change was Transmitted": 333
+    }
+  },
+  "audit": {
+    "trace_count": 1000,
+    "missing_policy_count": 0,
+    "violation_case_count": 86,
+    "critical_case_count": 2,
+    "audit_trace_coverage": 0.97,
+    "violations_by_code": {
+      "MISSING_REQUIRED_GR": 31,
+      "PAYMENT_WHILE_BLOCKED": 12,
+      "REVERSAL_AFTER_PAYMENT": 157,
+      "UNRELEASED_BLOCK": 4,
+      "VALUE_MISMATCH": 12
+    }
+  },
+  "notes": [
+    "BPIC2019 Cumulative net worth is treated as a snapshot amount, not a transaction amount to sum repeatedly.",
+    "Vendor creates invoice is left unmapped because Record Invoice Receipt is the accounting evidence used by the replay oracle.",
+    "SRM lifecycle states are visible as unmapped activities until a separate SRM-state oracle exists."
+  ]
+}

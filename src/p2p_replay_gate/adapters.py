@@ -165,7 +165,10 @@ def import_xes_events(
     report_path: Path | None = None,
     strict: bool = False,
     activity_map: dict[str, str] | None = None,
+    max_cases: int | None = None,
 ) -> ImportStats:
+    if max_cases is not None and max_cases < 1:
+        raise ValueError("max_cases must be greater than 0")
     activity_map = activity_map or _load_activity_map(activity_map_path)
     output_path.parent.mkdir(parents=True, exist_ok=True)
     row_count = 0
@@ -173,6 +176,7 @@ def import_xes_events(
     unmapped: dict[str, int] = {}
     row_errors: dict[str, int] = {}
     events_written = 0
+    seen_cases: set[str] = set()
     temp_path: Path | None = None
     try:
         with tempfile.NamedTemporaryFile(
@@ -184,7 +188,13 @@ def import_xes_events(
             delete=False,
         ) as output:
             temp_path = Path(output.name)
-            for row_count, row in enumerate(_xes_rows(input_path), start=1):
+            for row in _xes_rows(input_path):
+                case_id = row.get("case_id") or ""
+                if max_cases is not None and case_id not in seen_cases:
+                    if len(seen_cases) >= max_cases:
+                        break
+                    seen_cases.add(case_id)
+                row_count += 1
                 event_type = _event_type(row, STANDARD_COLUMN_MAP, activity_map)
                 if event_type is None:
                     activity = row.get("activity") or row.get("event_type") or "<missing>"
@@ -311,6 +321,9 @@ def _event_from_row(row: dict[str, str], source_row: int, column_map: dict[str, 
         value = _value(row, column_map, target)
         if value is not None:
             attrs[f"source_{target}"] = value
+    amount_semantics = row.get("amount_semantics")
+    if amount_semantics:
+        attrs["amount_semantics"] = amount_semantics
     flow_hint = _infer_flow_type_from_row(row, column_map)
     if flow_hint is not None:
         attrs["flow_hint"] = flow_hint
@@ -473,6 +486,10 @@ def _norm_activity(value: str) -> str:
 
 def _xes_rows(path: Path):
     for trace_attrs, event_attrs in _iter_xes(path):
+        event_amount = _pick(event_attrs, "amount", "Amount", "Net value")
+        cumulative_amount = _pick(event_attrs, "Cumulative net worth (EUR)")
+        trace_amount = _pick(trace_attrs, "amount", "Amount", "Net value")
+        trace_cumulative_amount = _pick(trace_attrs, "Cumulative net worth (EUR)", "case:Cumulative net worth (EUR)")
         yield {
             "case_id": _pick(trace_attrs, "concept:name", "case:concept:name"),
             "event_id": _pick(event_attrs, "identity:id", "event_id", "event:id"),
@@ -486,8 +503,8 @@ def _xes_rows(path: Path):
             "vendor_id": _pick(event_attrs, "Vendor", "Supplier", "vendor_id", "supplier")
             or _pick(trace_attrs, "Vendor", "Supplier", "case:Vendor", "vendor_id", "supplier"),
             "invoice_id": _pick(event_attrs, "Invoice", "Invoice ID", "Document", "Document ID", "invoice_id"),
-            "amount": _pick(event_attrs, "amount", "Amount", "Net value", "Cumulative net worth (EUR)")
-            or _pick(trace_attrs, "amount", "Amount", "Net value", "Cumulative net worth (EUR)", "case:Cumulative net worth (EUR)"),
+            "amount": event_amount or cumulative_amount or trace_amount or trace_cumulative_amount,
+            "amount_semantics": "cumulative_net_worth" if (cumulative_amount or trace_cumulative_amount) and not event_amount else None,
             "quantity": _pick(event_attrs, "quantity", "Quantity", "qty") or _pick(trace_attrs, "quantity", "Quantity", "qty"),
             "actor": _pick(event_attrs, "org:resource", "resource", "user", "User"),
             "item_category": _pick(trace_attrs, "Item Category", "case:Item Category", "Item Type", "case:Item Type", "item_category"),

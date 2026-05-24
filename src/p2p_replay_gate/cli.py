@@ -54,6 +54,7 @@ def main(argv: list[str] | None = None) -> int:
     xes_parser.add_argument("--output", type=Path, required=True, help="output JSONL path")
     xes_parser.add_argument("--activity-map", type=Path, default=None, help="optional JSON map from source activity to P2P event_type")
     xes_parser.add_argument("--pack", default=None, help="bundled mapping pack name, for example bpic2019")
+    xes_parser.add_argument("--max-cases", type=int, default=None, help="optional first-N-case smoke limit for large XES logs")
     xes_parser.add_argument("--report", type=Path, default=None, help="optional adapter report JSON path")
     xes_parser.add_argument("--strict", action="store_true", help="fail when any source activity is unmapped")
     xes_parser.set_defaults(func=_import_xes)
@@ -196,6 +197,7 @@ def _import_xes(args: argparse.Namespace) -> int:
         args.output,
         activity_map_path=args.activity_map,
         activity_map=_activity_map(args),
+        max_cases=args.max_cases,
         report_path=args.report,
         strict=args.strict,
     )
