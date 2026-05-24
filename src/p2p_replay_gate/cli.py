@@ -8,6 +8,7 @@ from typing import Any
 
 from .adapters import import_csv_events, import_xes_events, normalize_activity_map, write_policy_template
 from .fixture import write_fixture
+from .gate import ACTION_EVENT_TYPES, AgentAction, evaluate_agent_action
 from .io import group_events, load_events, load_policy, load_scenarios, read_json, write_json
 from .oracle import replay_case
 from .packs import load_activity_map, load_manifest
@@ -72,6 +73,24 @@ def main(argv: list[str] | None = None) -> int:
     audit_parser.add_argument("--policy", type=Path, required=True, help="case policy JSON")
     audit_parser.add_argument("--output", type=Path, default=Path("reports/audit.json"), help="audit report output path")
     audit_parser.set_defaults(func=_audit)
+
+    gate_parser = subparsers.add_parser("gate-action", help="pre-check an agent action before execution")
+    gate_parser.add_argument("--events", type=Path, required=True, help="event log JSONL")
+    gate_parser.add_argument("--policy", type=Path, required=True, help="case policy JSON")
+    gate_parser.add_argument("--action-file", type=Path, default=None, help="action JSON file")
+    gate_parser.add_argument("--action-json", default=None, help="inline action JSON object")
+    gate_parser.add_argument("--action", choices=sorted(ACTION_EVENT_TYPES), default=None, help="action type when not using --action-file or --action-json")
+    gate_parser.add_argument("--case-id", default=None, help="case id when not using --action-file or --action-json")
+    gate_parser.add_argument("--timestamp", default=None, help="optional proposed action timestamp")
+    gate_parser.add_argument("--actor", default="agent", help="proposed action actor")
+    gate_parser.add_argument("--po-id", default=None, help="optional PO id override")
+    gate_parser.add_argument("--line-id", default=None, help="optional PO line id override")
+    gate_parser.add_argument("--vendor-id", default=None, help="optional vendor id override")
+    gate_parser.add_argument("--invoice-id", default=None, help="optional invoice id override")
+    gate_parser.add_argument("--amount", type=float, default=None, help="optional amount override")
+    gate_parser.add_argument("--quantity", type=float, default=None, help="optional quantity override")
+    gate_parser.add_argument("--output", type=Path, default=None, help="decision JSON output path")
+    gate_parser.set_defaults(func=_gate_action)
 
     pack_parser = subparsers.add_parser("pack-info", help="print bundled mapping pack metadata")
     pack_parser.add_argument("pack", help="mapping pack name, for example bpic2019")
@@ -246,9 +265,46 @@ def _audit(args: argparse.Namespace) -> int:
     return int(summary["exit_code"])
 
 
+def _gate_action(args: argparse.Namespace) -> int:
+    action = _agent_action(args)
+    decision = evaluate_agent_action(load_events(args.events), load_policy(args.policy), action)
+    if args.output:
+        write_json(args.output, decision)
+        print(f"decision written: {args.output}")
+    print(f"decision: {decision['decision']} ({decision['reason']})")
+    return int(decision["exit_code"])
+
+
 def _pack_info(args: argparse.Namespace) -> int:
     print(json.dumps(load_manifest(args.pack), indent=2, sort_keys=True))
     return 0
+
+
+def _agent_action(args: argparse.Namespace) -> AgentAction:
+    if args.action_file:
+        data = read_json(args.action_file)
+        if not isinstance(data, dict):
+            raise ValueError(f"{args.action_file}: action file must contain a JSON object")
+        return AgentAction.from_dict(data)
+    if args.action_json:
+        data = json.loads(args.action_json)
+        if not isinstance(data, dict):
+            raise ValueError("--action-json must be a JSON object")
+        return AgentAction.from_dict(data)
+    if not args.action or not args.case_id:
+        raise ValueError("gate-action needs --action and --case-id, or --action-file/--action-json")
+    return AgentAction(
+        action_type=args.action,
+        case_id=args.case_id,
+        timestamp=args.timestamp,
+        actor=args.actor,
+        po_id=args.po_id,
+        line_id=args.line_id,
+        vendor_id=args.vendor_id,
+        invoice_id=args.invoice_id,
+        amount=args.amount,
+        quantity=args.quantity,
+    )
 
 
 def _activity_map(args: argparse.Namespace) -> dict[str, str] | None:

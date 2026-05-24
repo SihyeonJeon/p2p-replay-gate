@@ -131,6 +131,28 @@ class CliTests(unittest.TestCase):
         self.assertEqual(0, code)
         self.assertEqual("po_created", load_events(jsonl_path)[0].event_type)
 
+    def test_gate_action_command_blocks_unsafe_payment(self) -> None:
+        self._write_fixture()
+        output = self.root / "reports" / "agent_gate.json"
+        code, stdout, _ = self._main([
+            "gate-action",
+            "--events",
+            str(self.scenario_dir / "base_events.jsonl"),
+            "--policy",
+            str(self.scenario_dir / "policy.json"),
+            "--action",
+            "clear_payment",
+            "--case-id",
+            "C004",
+            "--output",
+            str(output),
+        ])
+        self.assertEqual(3, code)
+        self.assertIn("decision: block", stdout)
+        report = read_json(output)
+        self.assertEqual("block", report["decision"])
+        self.assertIn("PAYMENT_BEFORE_APPROVAL", report["blocking_codes"])
+
 
 if __name__ == "__main__":
     unittest.main()

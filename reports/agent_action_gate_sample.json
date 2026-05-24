@@ -1,0 +1,75 @@
+{
+  "run_id": "p2p-agent-action-gate-v0",
+  "decision": "block",
+  "reason": "blocked by PAYMENT_BEFORE_APPROVAL",
+  "case_id": "C004",
+  "action": {
+    "action_type": "clear_payment",
+    "case_id": "C004",
+    "timestamp": null,
+    "actor": "agent",
+    "po_id": null,
+    "line_id": null,
+    "vendor_id": null,
+    "invoice_id": null,
+    "amount": null,
+    "quantity": null,
+    "attrs": {}
+  },
+  "proposed_event": {
+    "case_id": "C004",
+    "event_id": "C004-agent-clear_payment-INV-C004",
+    "timestamp": "2026-01-03T09:00:01Z",
+    "event_type": "payment_cleared",
+    "po_id": "PO-C004",
+    "line_id": "10",
+    "vendor_id": "V04",
+    "invoice_id": "INV-C004",
+    "amount": 2200.0,
+    "quantity": 20.0,
+    "actor": "agent",
+    "attrs": {}
+  },
+  "policy": {
+    "case_id": "C004",
+    "flow_type": "consignment",
+    "po_amount": 2200.0,
+    "po_quantity": 20.0,
+    "vendor_id": "V04",
+    "approval_limit": 1000.0,
+    "amount_tolerance": 0.01,
+    "quantity_tolerance": 0.0
+  },
+  "baseline": {
+    "event_count": 2,
+    "audit_trace_complete": true,
+    "has_critical": false,
+    "violations": []
+  },
+  "after_action": {
+    "event_count": 3,
+    "audit_trace_complete": true,
+    "has_critical": true,
+    "violations": [
+      {
+        "code": "PAYMENT_BEFORE_APPROVAL",
+        "severity": "critical",
+        "event_id": "C004-agent-clear_payment-INV-C004",
+        "message": "payment cleared before required approval",
+        "evidence": {
+          "approval_limit": 1000.0,
+          "po_amount": 2200.0
+        }
+      }
+    ]
+  },
+  "new_codes": [
+    "PAYMENT_BEFORE_APPROVAL"
+  ],
+  "resolved_codes": [],
+  "blocking_codes": [
+    "PAYMENT_BEFORE_APPROVAL"
+  ],
+  "scope_note": "pre-execution action gate over supplied purchase-to-pay trace and policy",
+  "exit_code": 3
+}

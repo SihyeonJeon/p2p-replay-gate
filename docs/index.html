@@ -80,7 +80,7 @@
     }
     .metrics {
       display: grid;
-      grid-template-columns: repeat(4, minmax(0, 1fr));
+      grid-template-columns: repeat(5, minmax(0, 1fr));
       gap: 14px;
     }
     .metric {
@@ -200,7 +200,7 @@
       </div>
       <aside class="run-card">
         <div class="eyebrow">run</div>
-        <div class="command">python -m pip install -e .
+        <div class="command">python3 -m pip install -e .
 p2p-replay-gate validate --events data/scenarios/base_events.jsonl --scenario-pack data/scenarios/injected_scenarios.json
 p2p-replay-gate run --events data/scenarios/base_events.jsonl --scenario-pack data/scenarios/injected_scenarios.json --output reports/scorecard.json</div>
       </aside>
@@ -229,6 +229,11 @@ p2p-replay-gate run --events data/scenarios/base_events.jsonl --scenario-pack da
           <strong>0</strong>
           <span>unnecessary holds emitted on clean traces</span>
         </div>
+        <div class="metric">
+          <div class="eyebrow">agent gate</div>
+          <strong>block</strong>
+          <span>unsafe clear_payment sample exits before execution</span>
+        </div>
       </div>
     </section>
 
@@ -250,6 +255,14 @@ p2p-replay-gate policy-template --events imported/bpic2019.jsonl --output import
 p2p-replay-gate audit --events imported/bpic2019.jsonl --policy imported/bpic2019_policy.json --output imported/bpic2019_audit.json</div>
       <p class="note">Real smoke run: 1,000 BPIC2019 cases, 15,351 source rows, 10,627 replay events, 0 row errors, 0.970 audit trace coverage.</p>
       <p class="note">Use the adapter report before making claims. Activities outside the replay oracle scope should remain visible as unmapped or be handled by a custom activity map. BPIC2019 does not expose the full approval workflow, so the pack keeps approval checks disabled unless custom evidence is supplied.</p>
+    </section>
+
+    <section>
+      <h2>Agent Action Gate</h2>
+      <p class="note">Before an AP agent clears payment, the proposed action is converted into a replay event and checked against the same policy oracle.</p>
+      <div class="command" style="margin-top:14px">p2p-replay-gate gate-action --events data/scenarios/base_events.jsonl --policy data/scenarios/policy.json --action clear_payment --case-id C004 --output reports/agent_action_gate_sample.json
+decision: block (blocked by PAYMENT_BEFORE_APPROVAL)</div>
+      <p class="note">The sample report records baseline state, proposed event, after-action violations, new codes, resolved codes, and an exit code for CI or agent tool wrappers.</p>
     </section>
 
     <section>
