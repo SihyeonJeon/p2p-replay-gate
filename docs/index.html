@@ -284,6 +284,23 @@ summary: status=pass events=51 cases=12</div>
     </section>
 
     <section>
+      <h2>Persistent Replay Store</h2>
+      <p class="note">The store replay path adds a local SQLite event store, idempotent append, bounded ingest flushes, partition checkpoints, and simulated interruption recovery.</p>
+      <table style="margin-top:14px">
+        <thead><tr><th>Check</th><th>Fixture result</th><th>Model</th></tr></thead>
+        <tbody>
+          <tr><td>append pressure</td><td>255 attempted appends</td><td>5 repeated passes over 51 unique events</td></tr>
+          <tr><td>idempotency</td><td>204 duplicate retries</td><td>event_id primary key, at-least-once append</td></tr>
+          <tr><td>backpressure</td><td>peak queue depth 16</td><td>bounded local flush threshold</td></tr>
+          <tr><td>partition replay</td><td>4 partitions</td><td>stable sha256(case_id) modulo partition count</td></tr>
+          <tr><td>recovery</td><td>2 checkpoints before interrupt, 4 after recovery</td><td>partition cursor after successful replay</td></tr>
+        </tbody>
+      </table>
+      <div class="command" style="margin-top:14px">p2p-replay-gate store-replay --events data/scenarios/base_events.jsonl --policy data/scenarios/policy.json --db reports/replay_store.sqlite --output reports/store_replay_report.json --partitions 4 --repeats 5 --queue-limit 16 --simulate-crash-after 2
+summary: status=recovered events=51 checkpoints=4 duplicate_retries=204</div>
+    </section>
+
+    <section>
       <h2>Replay Shape</h2>
       <p class="note">The gate tests workflow state, not only final labels.</p>
       <div class="flow" style="margin-top:14px">

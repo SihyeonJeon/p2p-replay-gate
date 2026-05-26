@@ -1,0 +1,123 @@
+{
+  "run_id": "p2p-replay-gate-store-replay-v0",
+  "scope_note": "local SQLite replay-store pressure and recovery check over supplied event log; not a production SLA",
+  "input": {
+    "events_path": "data/scenarios/base_events.jsonl",
+    "unique_events": 51,
+    "append_repeats": 5,
+    "attempted_appends": 255,
+    "replayable_cases": 12
+  },
+  "consistency_model": {
+    "ingest_semantics": "at-least-once append with event_id primary-key idempotency",
+    "case_order": [
+      "case_id",
+      "timestamp",
+      "event_id"
+    ],
+    "partition_key": "stable sha256(case_id) modulo partition_count",
+    "checkpoint_scope": "partition cursor after successful replay",
+    "cross_case_boundary": "no cross-case distributed transaction model in this artifact"
+  },
+  "storage": {
+    "engine": "sqlite",
+    "schema_version": "p2p_replay_store.v1",
+    "db_path": "reports/replay_store.sqlite",
+    "journal_mode": "wal",
+    "event_rows": 51,
+    "checkpoint_rows": 4,
+    "db_bytes": 222296,
+    "indexes": [
+      "events(case_id, timestamp, event_id)",
+      "events(timestamp, event_id)",
+      "checkpoints(runner_id, partition_id)"
+    ]
+  },
+  "backpressure": {
+    "queue_limit": 16,
+    "peak_queue_depth": 16,
+    "flush_count": 16,
+    "duplicate_retries": 204,
+    "inserted_events": 51
+  },
+  "partitioning": {
+    "partition_count": 4,
+    "case_counts": {
+      "0": 4,
+      "1": 1,
+      "2": 3,
+      "3": 4
+    },
+    "event_counts": {
+      "0": 20,
+      "1": 2,
+      "2": 12,
+      "3": 17
+    },
+    "partition_matches_serial": true,
+    "elapsed_ms": 1.403
+  },
+  "failure_recovery": {
+    "simulated_interrupt_after_partitions": 2,
+    "checkpoint_count_after_interrupt": 2,
+    "recovered_partition_count": 2,
+    "final_checkpoint_count": 4,
+    "status": "recovered",
+    "checkpoints": [
+      {
+        "partition_id": 0,
+        "cursor": {
+          "case_id": "C009",
+          "timestamp": "2026-01-06T09:00:00Z",
+          "event_id": "C009-05-payment_cleared-INV-C009"
+        },
+        "replay_digest": "3ebf156ea7d0fdf121b2a0d88e1b164041a07e33e529a64691e44b2e0bfb6448",
+        "case_count": 4,
+        "event_count": 20
+      },
+      {
+        "partition_id": 1,
+        "cursor": {
+          "case_id": "C008",
+          "timestamp": "2026-01-03T09:00:00Z",
+          "event_id": "C008-02-goods_receipt-na"
+        },
+        "replay_digest": "44066852e849fe7ca61afd8cbab1a752d698df27e3b438f16bfb8c7eb67de583",
+        "case_count": 1,
+        "event_count": 2
+      },
+      {
+        "partition_id": 2,
+        "cursor": {
+          "case_id": "C012",
+          "timestamp": "2026-01-03T09:00:00Z",
+          "event_id": "C012-02-goods_receipt-na"
+        },
+        "replay_digest": "6276ddf6524b02ed3c71cba20cf6c0fda933b28a72df197821b7edcf02255b4f",
+        "case_count": 3,
+        "event_count": 12
+      },
+      {
+        "partition_id": 3,
+        "cursor": {
+          "case_id": "C011",
+          "timestamp": "2026-01-04T09:00:00Z",
+          "event_id": "C011-03-payment_cleared-INV-C011"
+        },
+        "replay_digest": "9f8063038d2bc4d3b482a4ca9bbd4717cc91d21b08313a1a74db499f8ba13ea7",
+        "case_count": 4,
+        "event_count": 17
+      }
+    ]
+  },
+  "replay": {
+    "violations_by_code": {},
+    "replay_digest": "c43816d44410cea91fad9349828945ea2ed8969500e5731a29c4bebcee11f8c3",
+    "resume_cursor": {
+      "case_id": "C012",
+      "timestamp": "2026-01-03T09:00:00Z",
+      "event_id": "C012-02-goods_receipt-na"
+    }
+  },
+  "production_boundary": "This store proves local idempotent persistence, checkpointed partition replay, and recovery behavior. Real operation still needs queue service semantics, multi-writer contention tests, observability, access control, and ERP mapping review."
+}

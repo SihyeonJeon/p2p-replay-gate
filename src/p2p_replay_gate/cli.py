@@ -15,6 +15,7 @@ from .oracle import replay_case
 from .packs import load_activity_map, load_manifest
 from .report import build_audit_report, build_report
 from .scenario import validate_scenario_expectations
+from .storage import build_store_replay_report
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -81,6 +82,18 @@ def main(argv: list[str] | None = None) -> int:
     ops_parser.add_argument("--output", type=Path, default=Path("reports/ops_readiness.json"), help="ops report output path")
     ops_parser.add_argument("--iterations", type=int, default=1, help="replay iterations for local throughput timing")
     ops_parser.set_defaults(func=_ops_report)
+
+    store_parser = subparsers.add_parser("store-replay", help="run SQLite-backed partition replay and recovery checks")
+    store_parser.add_argument("--events", type=Path, required=True, help="event log JSONL")
+    store_parser.add_argument("--policy", type=Path, required=True, help="case policy JSON")
+    store_parser.add_argument("--db", type=Path, default=Path("reports/replay_store.sqlite"), help="SQLite store path")
+    store_parser.add_argument("--output", type=Path, default=Path("reports/store_replay_report.json"), help="store replay report output path")
+    store_parser.add_argument("--partitions", type=int, default=4, help="case partitions for replay")
+    store_parser.add_argument("--repeats", type=int, default=2, help="append repeats to model at-least-once retries")
+    store_parser.add_argument("--queue-limit", type=int, default=32, help="local ingest queue flush threshold")
+    store_parser.add_argument("--simulate-crash-after", type=int, default=None, help="partition count to checkpoint before simulated interruption")
+    store_parser.add_argument("--keep-db", action="store_true", help="reuse the existing SQLite store instead of resetting it")
+    store_parser.set_defaults(func=_store_replay)
 
     gate_parser = subparsers.add_parser("gate-action", help="pre-check an agent action before execution")
     gate_parser.add_argument("--events", type=Path, required=True, help="event log JSONL")
@@ -287,6 +300,31 @@ def _ops_report(args: argparse.Namespace) -> int:
         f"events_per_second={replay['events_per_second']}"
     )
     return 0 if readiness["status"] != "fail" else 2
+
+
+def _store_replay(args: argparse.Namespace) -> int:
+    report = build_store_replay_report(
+        args.events,
+        load_policy(args.policy),
+        db_path=args.db,
+        partitions=args.partitions,
+        repeats=args.repeats,
+        queue_limit=args.queue_limit,
+        simulate_crash_after_partitions=args.simulate_crash_after,
+        reset_db=not args.keep_db,
+    )
+    write_json(args.output, report)
+    storage = report["storage"]
+    recovery = report["failure_recovery"]
+    print(f"store replay written: {args.output}")
+    print(
+        "summary: "
+        f"status={recovery['status']} "
+        f"events={storage['event_rows']} "
+        f"checkpoints={storage['checkpoint_rows']} "
+        f"duplicate_retries={report['backpressure']['duplicate_retries']}"
+    )
+    return 0 if recovery["status"] == "recovered" else 2
 
 
 def _gate_action(args: argparse.Namespace) -> int:

@@ -174,6 +174,34 @@ class CliTests(unittest.TestCase):
         self.assertEqual(12, report["input"]["replayable_cases"])
         self.assertIn("replay_digest", report["replay"])
 
+    def test_store_replay_command_writes_recovery_report(self) -> None:
+        self._write_fixture()
+        output = self.root / "reports" / "store_replay.json"
+        db_path = self.root / "reports" / "store.sqlite"
+        code, stdout, _ = self._main([
+            "store-replay",
+            "--events",
+            str(self.scenario_dir / "base_events.jsonl"),
+            "--policy",
+            str(self.scenario_dir / "policy.json"),
+            "--db",
+            str(db_path),
+            "--output",
+            str(output),
+            "--partitions",
+            "2",
+            "--repeats",
+            "2",
+            "--simulate-crash-after",
+            "1",
+        ])
+        self.assertEqual(0, code)
+        self.assertIn("store replay written", stdout)
+        report = read_json(output)
+        self.assertEqual("recovered", report["failure_recovery"]["status"])
+        self.assertEqual(51, report["storage"]["event_rows"])
+        self.assertEqual(51, report["backpressure"]["duplicate_retries"])
+
 
 if __name__ == "__main__":
     unittest.main()

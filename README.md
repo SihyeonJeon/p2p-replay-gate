@@ -22,7 +22,8 @@ Visual case page: <https://sihyeonjeon.github.io/projects/p2p-replay-gate/>
 - checks 2-way, 3-way, consignment, approval, duplicate, and hold rules
 - scores violation detection, duplicate recall, false holds, and trace coverage
 - blocks proposed agent actions before unsafe payment or approval events execute
-- reports idempotency, ordering, schema version, parallel consistency, digest, and resume cursor
+- reports idempotency, ordering, schema version, persistence, checkpoints,
+  parallel consistency, digest, and resume cursor
 
 ## Current Result
 
@@ -32,7 +33,7 @@ Synthetic fixture plus BPIC2019 smoke
 | --- | ---: |
 | clean traces | 12 |
 | injected scenarios | 48 |
-| tests | 61 |
+| tests | 66 |
 | critical violations caught | 36 / 36 |
 | duplicate catch recall | 1.000 |
 | false holds on clean traces | 0 |
@@ -40,6 +41,7 @@ Synthetic fixture plus BPIC2019 smoke
 | BPIC2019 trace coverage | 0.970 |
 | action gate decisions | `allow` / `review` / `block` |
 | ops-readiness fixture | `pass` |
+| store replay recovery | `recovered` |
 
 Example gate output:
 
@@ -115,6 +117,26 @@ case-partitioned parallel replay consistency, deterministic replay digest,
 replay cursor, and local replay timing. It is a readiness check over the
 supplied log, not a production SLA.
 
+Run a persistent replay-store check:
+
+```bash
+p2p-replay-gate store-replay \
+  --events data/scenarios/base_events.jsonl \
+  --policy data/scenarios/policy.json \
+  --db reports/replay_store.sqlite \
+  --output reports/store_replay_report.json \
+  --partitions 4 \
+  --repeats 5 \
+  --queue-limit 16 \
+  --simulate-crash-after 2
+```
+
+This creates a local SQLite event store, appends repeated events with
+`event_id` primary-key idempotency, flushes a bounded ingest queue, replays
+case partitions, writes partition checkpoints, simulates an interruption, and
+recovers the remaining partitions. The SQLite file is a reproducible local
+artifact and is not committed.
+
 ## Import Event Logs
 
 CSV:
@@ -163,6 +185,8 @@ For the official full XES, start with `--max-cases 1000` and inspect
   1,000-case real-log smoke summary
 - [reports/ops_readiness.json](reports/ops_readiness.json):
   idempotency, ordering, schema, parallel consistency, digest, and resume cursor report
+- [reports/store_replay_report.json](reports/store_replay_report.json):
+  SQLite persistence, backpressure, checkpoint, partition, and recovery report
 - [docs/index.html](docs/index.html): local visual summary
 
 ## Test
@@ -175,6 +199,7 @@ PYTHONPATH=src python3 -m unittest discover -s tests -v
 
 Synthetic fixture evidence only. No real vendor, invoice, payment, or company
 data is included. BPIC2019 is supported as a mapping pack, but the source log is
-not redistributed here. Production operation still needs persistent storage,
-queue semantics, auth, monitoring, rollback, incident response, and ERP-specific
-mapping review.
+not redistributed here. The local SQLite path demonstrates replay-store design
+mechanics, not ERP production operation. Real deployment still needs queue
+service semantics, multi-writer contention tests, auth, monitoring, rollback,
+incident response, and ERP-specific mapping review.
