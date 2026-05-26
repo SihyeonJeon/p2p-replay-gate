@@ -1,58 +1,77 @@
 # p2p-replay-gate
 
-Replay and policy-oracle evaluation for purchase-to-pay agent workflows
+[![CI](https://github.com/SihyeonJeon/p2p-replay-gate/actions/workflows/ci.yml/badge.svg)](https://github.com/SihyeonJeon/p2p-replay-gate/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
-Invoice agents fail when documents disagree: duplicate invoices, partial receipts, vendor mismatch, missing approval, payment before goods receipt. This repo tests those state transitions before an agent touches an AP queue.
+Replay purchase-to-pay state before an invoice agent acts
 
-## What it does
+Invoice agents can make unsafe moves when documents look clean but workflow
+state is wrong: duplicate invoices, vendor mismatch, missing goods receipt,
+missing approval, payment before release, or payment while blocked. This repo
+turns those cases into replayable traces, policy checks, and a pre-execution
+action gate.
 
-- replays P2P traces from JSONL
-- streams process-mining style CSV or XES event logs into the replay format
-- writes a policy skeleton for imported traces
-- injects seeded procurement defects
-- checks 2-way, 3-way, consignment, approval, duplicate, and payment-hold rules
-- scores policy violations, duplicate catch recall, false holds, determinism, and audit trace coverage
-- writes a reviewable failure queue
-- pre-checks proposed agent actions before payment, approval, receipt, or invoice steps execute
+Visual case page: <https://sihyeonjeon.github.io/projects/p2p-replay-gate/>
 
-## Current result
+## What It Does
 
-Fixture v0
+- replays purchase-to-pay traces from JSONL
+- imports process-mining CSV or XES event logs
+- maps BPIC2019-style activities into the replay format
+- injects duplicate, receipt, vendor, approval, and payment defects
+- checks 2-way, 3-way, consignment, approval, duplicate, and hold rules
+- scores violation detection, duplicate recall, false holds, and trace coverage
+- blocks proposed agent actions before unsafe payment or approval events execute
+
+## Current Result
+
+Synthetic fixture plus BPIC2019 smoke
 
 | Check | Result |
 | --- | ---: |
 | clean traces | 12 |
 | injected scenarios | 48 |
 | tests | 58 |
-| critical policy violations caught | 36/36 |
+| critical violations caught | 36 / 36 |
 | duplicate catch recall | 1.000 |
 | false holds on clean traces | 0 |
 | BPIC2019 smoke | 1,000 cases |
-| agent action gate | `allow` / `review` / `block` |
+| BPIC2019 trace coverage | 0.970 |
+| action gate decisions | `allow` / `review` / `block` |
 
-Visual summary: <https://sihyeonjeon.github.io/p2p-replay-gate/>
+Example gate output:
 
-Real-log smoke summary: `reports/bpic2019_smoke_summary.json`
+```text
+decision: block
+reason: blocked by PAYMENT_BEFORE_APPROVAL
+case: C004
+```
 
-Agent-action sample: `reports/agent_action_gate_sample.json`
+The gate compares the current trace with the trace after the proposed action.
+If the new event introduces a critical policy violation, the action is blocked
+before the agent writes to an AP queue.
 
-## Run
+## Quick Start
 
 ```bash
+git clone https://github.com/SihyeonJeon/p2p-replay-gate
+cd p2p-replay-gate
 python3 -m venv .venv
 source .venv/bin/activate
 python3 -m pip install -e .
-p2p-replay-gate validate --events data/scenarios/base_events.jsonl --scenario-pack data/scenarios/injected_scenarios.json
-p2p-replay-gate run --events data/scenarios/base_events.jsonl --scenario-pack data/scenarios/injected_scenarios.json --output reports/local_scorecard.json
-p2p-replay-gate inspect --report reports/local_scorecard.json --top 10
 ```
 
-Import a CSV event log:
+Run the fixture:
 
 ```bash
-p2p-replay-gate import-csv --input examples/events.csv --output imported/events.jsonl --report imported/adapter_report.json
-p2p-replay-gate policy-template --events imported/events.jsonl --output imported/policy.json --flow-type three_way_gr_based
-p2p-replay-gate audit --events imported/events.jsonl --policy imported/policy.json --output imported/audit.json
+p2p-replay-gate validate \
+  --events data/scenarios/base_events.jsonl \
+  --scenario-pack data/scenarios/injected_scenarios.json
+
+p2p-replay-gate run \
+  --events data/scenarios/base_events.jsonl \
+  --scenario-pack data/scenarios/injected_scenarios.json \
+  --output reports/local_scorecard.json
 ```
 
 Pre-check an agent action:
@@ -66,18 +85,28 @@ p2p-replay-gate gate-action \
   --output reports/agent_action_gate_sample.json
 ```
 
-Example output:
+## Import Event Logs
 
-```text
-decision: block (blocked by PAYMENT_BEFORE_APPROVAL)
+CSV:
+
+```bash
+p2p-replay-gate import-csv \
+  --input examples/events.csv \
+  --output imported/events.jsonl \
+  --report imported/adapter_report.json
+
+p2p-replay-gate policy-template \
+  --events imported/events.jsonl \
+  --output imported/policy.json \
+  --flow-type three_way_gr_based
+
+p2p-replay-gate audit \
+  --events imported/events.jsonl \
+  --policy imported/policy.json \
+  --output imported/audit.json
 ```
 
-Use this before an AP agent clears payment, releases an invoice, records a
-receipt, or writes an approval event.
-
-`policy-template` fails when amount data is missing, unless `--allow-missing-amount` is passed.
-
-XES works the same way:
+XES:
 
 ```bash
 p2p-replay-gate import-xes --input examples/events.xes --output imported/events.jsonl --strict
@@ -92,9 +121,19 @@ p2p-replay-gate policy-template --events imported/bpic2019.jsonl --output import
 p2p-replay-gate audit --events imported/bpic2019.jsonl --policy imported/bpic2019_policy.json --output imported/bpic2019_audit.json
 ```
 
-For the official full XES, start with `--max-cases 1000` and inspect `unmapped_activities`.
+For the official full XES, start with `--max-cases 1000` and inspect
+`unmapped_activities` before relying on the mapping.
 
-Test:
+## Evidence Files
+
+- [reports/scorecard.json](reports/scorecard.json): synthetic fixture scorecard
+- [reports/agent_action_gate_sample.json](reports/agent_action_gate_sample.json):
+  blocked payment sample
+- [reports/bpic2019_smoke_summary.json](reports/bpic2019_smoke_summary.json):
+  1,000-case real-log smoke summary
+- [docs/index.html](docs/index.html): local visual summary
+
+## Test
 
 ```bash
 PYTHONPATH=src python3 -m unittest discover -s tests -v
@@ -102,4 +141,6 @@ PYTHONPATH=src python3 -m unittest discover -s tests -v
 
 ## Boundary
 
-Synthetic fixture evidence only. No real vendor, invoice, payment, or company data is included. BPIC2019 is supported as a mapping pack, but the source log is not redistributed here.
+Synthetic fixture evidence only. No real vendor, invoice, payment, or company
+data is included. BPIC2019 is supported as a mapping pack, but the source log is
+not redistributed here.
