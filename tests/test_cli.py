@@ -153,6 +153,27 @@ class CliTests(unittest.TestCase):
         self.assertEqual("block", report["decision"])
         self.assertIn("PAYMENT_BEFORE_APPROVAL", report["blocking_codes"])
 
+    def test_ops_report_command_writes_operational_checks(self) -> None:
+        self._write_fixture()
+        output = self.root / "reports" / "ops.json"
+        code, stdout, _ = self._main([
+            "ops-report",
+            "--events",
+            str(self.scenario_dir / "base_events.jsonl"),
+            "--policy",
+            str(self.scenario_dir / "policy.json"),
+            "--output",
+            str(output),
+            "--iterations",
+            "2",
+        ])
+        self.assertEqual(0, code)
+        self.assertIn("ops report written", stdout)
+        report = read_json(output)
+        self.assertEqual("p2p-replay-gate-ops-readiness-v0", report["run_id"])
+        self.assertEqual(12, report["input"]["replayable_cases"])
+        self.assertIn("replay_digest", report["replay"])
+
 
 if __name__ == "__main__":
     unittest.main()

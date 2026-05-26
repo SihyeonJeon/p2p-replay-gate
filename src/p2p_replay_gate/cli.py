@@ -10,6 +10,7 @@ from .adapters import import_csv_events, import_xes_events, normalize_activity_m
 from .fixture import write_fixture
 from .gate import ACTION_EVENT_TYPES, AgentAction, evaluate_agent_action
 from .io import group_events, load_events, load_policy, load_scenarios, read_json, write_json
+from .ops import build_ops_report
 from .oracle import replay_case
 from .packs import load_activity_map, load_manifest
 from .report import build_audit_report, build_report
@@ -73,6 +74,13 @@ def main(argv: list[str] | None = None) -> int:
     audit_parser.add_argument("--policy", type=Path, required=True, help="case policy JSON")
     audit_parser.add_argument("--output", type=Path, default=Path("reports/audit.json"), help="audit report output path")
     audit_parser.set_defaults(func=_audit)
+
+    ops_parser = subparsers.add_parser("ops-report", help="write operational-readiness checks for an event log")
+    ops_parser.add_argument("--events", type=Path, required=True, help="event log JSONL")
+    ops_parser.add_argument("--policy", type=Path, required=True, help="case policy JSON")
+    ops_parser.add_argument("--output", type=Path, default=Path("reports/ops_readiness.json"), help="ops report output path")
+    ops_parser.add_argument("--iterations", type=int, default=1, help="replay iterations for local throughput timing")
+    ops_parser.set_defaults(func=_ops_report)
 
     gate_parser = subparsers.add_parser("gate-action", help="pre-check an agent action before execution")
     gate_parser.add_argument("--events", type=Path, required=True, help="event log JSONL")
@@ -263,6 +271,22 @@ def _audit(args: argparse.Namespace) -> int:
         f"missing_policy={summary['missing_policy_count']}"
     )
     return int(summary["exit_code"])
+
+
+def _ops_report(args: argparse.Namespace) -> int:
+    report = build_ops_report(args.events, load_policy(args.policy), iterations=args.iterations)
+    write_json(args.output, report)
+    replay = report["replay"]
+    readiness = report["readiness"]
+    print(f"ops report written: {args.output}")
+    print(
+        "summary: "
+        f"status={readiness['status']} "
+        f"events={report['input']['deduped_events']} "
+        f"cases={report['input']['replayable_cases']} "
+        f"events_per_second={replay['events_per_second']}"
+    )
+    return 0 if readiness["status"] != "fail" else 2
 
 
 def _gate_action(args: argparse.Namespace) -> int:

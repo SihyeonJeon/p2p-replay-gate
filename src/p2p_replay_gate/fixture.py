@@ -5,6 +5,9 @@ from pathlib import Path
 from typing import Any
 
 
+EVENT_SCHEMA_VERSION = "p2p.replay_event.v1"
+
+
 def write_fixture(root: Path) -> None:
     scenario_dir = root / "data" / "scenarios"
     scenario_dir.mkdir(parents=True, exist_ok=True)
@@ -246,7 +249,10 @@ def _event(
         "amount": amount,
         "quantity": quantity,
         "actor": actor,
-        "attrs": {},
+        "attrs": {
+            "schema_version": EVENT_SCHEMA_VERSION,
+            "source_system": "synthetic_p2p_fixture",
+        },
     }
 
 

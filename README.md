@@ -22,6 +22,7 @@ Visual case page: <https://sihyeonjeon.github.io/projects/p2p-replay-gate/>
 - checks 2-way, 3-way, consignment, approval, duplicate, and hold rules
 - scores violation detection, duplicate recall, false holds, and trace coverage
 - blocks proposed agent actions before unsafe payment or approval events execute
+- reports idempotency, ordering, schema version, parallel consistency, digest, and resume cursor
 
 ## Current Result
 
@@ -31,13 +32,14 @@ Synthetic fixture plus BPIC2019 smoke
 | --- | ---: |
 | clean traces | 12 |
 | injected scenarios | 48 |
-| tests | 58 |
+| tests | 61 |
 | critical violations caught | 36 / 36 |
 | duplicate catch recall | 1.000 |
 | false holds on clean traces | 0 |
 | BPIC2019 smoke | 1,000 cases |
 | BPIC2019 trace coverage | 0.970 |
 | action gate decisions | `allow` / `review` / `block` |
+| ops-readiness fixture | `pass` |
 
 Example gate output:
 
@@ -50,6 +52,19 @@ case: C004
 The gate compares the current trace with the trace after the proposed action.
 If the new event introduces a critical policy violation, the action is blocked
 before the agent writes to an AP queue.
+
+## Domain Surface
+
+Covered workflow evidence:
+
+- PO, line, vendor, amount, quantity
+- 2-way match, 3-way match, invoice-before-GR, consignment
+- goods receipt, invoice block, invoice release, approval threshold, payment clear
+- duplicate invoice, vendor mismatch, value mismatch, quantity mismatch, early payment
+
+This is not a SAP or Oracle connector. The adapters map CSV/XES process logs
+into a replay contract so policy behavior can be tested before a live ERP
+integration is attempted.
 
 ## Quick Start
 
@@ -84,6 +99,21 @@ p2p-replay-gate gate-action \
   --case-id C004 \
   --output reports/agent_action_gate_sample.json
 ```
+
+Check operational replay hygiene:
+
+```bash
+p2p-replay-gate ops-report \
+  --events data/scenarios/base_events.jsonl \
+  --policy data/scenarios/policy.json \
+  --output reports/ops_readiness.json \
+  --iterations 20
+```
+
+The report checks `event_id` idempotency, input ordering, `attrs.schema_version`,
+case-partitioned parallel replay consistency, deterministic replay digest,
+replay cursor, and local replay timing. It is a readiness check over the
+supplied log, not a production SLA.
 
 ## Import Event Logs
 
@@ -131,6 +161,8 @@ For the official full XES, start with `--max-cases 1000` and inspect
   blocked payment sample
 - [reports/bpic2019_smoke_summary.json](reports/bpic2019_smoke_summary.json):
   1,000-case real-log smoke summary
+- [reports/ops_readiness.json](reports/ops_readiness.json):
+  idempotency, ordering, schema, parallel consistency, digest, and resume cursor report
 - [docs/index.html](docs/index.html): local visual summary
 
 ## Test
@@ -143,4 +175,6 @@ PYTHONPATH=src python3 -m unittest discover -s tests -v
 
 Synthetic fixture evidence only. No real vendor, invoice, payment, or company
 data is included. BPIC2019 is supported as a mapping pack, but the source log is
-not redistributed here.
+not redistributed here. Production operation still needs persistent storage,
+queue semantics, auth, monitoring, rollback, incident response, and ERP-specific
+mapping review.

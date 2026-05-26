@@ -266,6 +266,24 @@ decision: block (blocked by PAYMENT_BEFORE_APPROVAL)</div>
     </section>
 
     <section>
+      <h2>Operational Readiness Check</h2>
+      <p class="note">The ops report checks replay hygiene over the supplied log. It does not claim production SLA coverage.</p>
+      <table style="margin-top:14px">
+        <thead><tr><th>Check</th><th>Fixture result</th><th>Why it matters</th></tr></thead>
+        <tbody>
+          <tr><td>idempotency</td><td>0 duplicate event_id rows</td><td>safe retry and replay behavior starts with stable event identity</td></tr>
+          <tr><td>ordering</td><td>0 input inversions</td><td>late or out-of-order events remain visible before policy replay</td></tr>
+          <tr><td>schema</td><td>51 / 51 events versioned</td><td>event contract can evolve without silent parser drift</td></tr>
+          <tr><td>parallel replay</td><td>serial output matches 4-worker output</td><td>case-level partitioning stays deterministic under concurrent evaluation</td></tr>
+          <tr><td>digest</td><td>SHA-256 replay fingerprint</td><td>same event and policy payload can be compared across runs</td></tr>
+          <tr><td>resume</td><td>last case/timestamp/event cursor</td><td>batch replay can expose a restart point</td></tr>
+        </tbody>
+      </table>
+      <div class="command" style="margin-top:14px">p2p-replay-gate ops-report --events data/scenarios/base_events.jsonl --policy data/scenarios/policy.json --output reports/ops_readiness.json --iterations 20
+summary: status=pass events=51 cases=12</div>
+    </section>
+
+    <section>
       <h2>Replay Shape</h2>
       <p class="note">The gate tests workflow state, not only final labels.</p>
       <div class="flow" style="margin-top:14px">

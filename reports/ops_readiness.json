@@ -1,0 +1,62 @@
+{
+  "run_id": "p2p-replay-gate-ops-readiness-v0",
+  "scope_note": "operational-readiness checks over supplied event log; not a production SLA",
+  "input": {
+    "events_path": "data/scenarios/base_events.jsonl",
+    "raw_rows": 51,
+    "valid_rows": 51,
+    "deduped_events": 51,
+    "policy_cases": 12,
+    "replayable_cases": 12
+  },
+  "idempotency": {
+    "key": "event_id",
+    "duplicate_event_id_count": 0,
+    "duplicate_event_ids": {},
+    "dedupe_strategy": "first event_id wins for this report; validate/load paths remain strict"
+  },
+  "ordering": {
+    "key": [
+      "case_id",
+      "timestamp",
+      "event_id"
+    ],
+    "input_order_inversions": 0,
+    "inversion_samples": [],
+    "same_timestamp_collision_count": 0,
+    "same_timestamp_collision_keys": {}
+  },
+  "schema": {
+    "event_schema_version_attr": "attrs.schema_version",
+    "schema_version_counts": {
+      "p2p.replay_event.v1": 51
+    },
+    "missing_schema_version_count": 0,
+    "legacy_default": "p2p.replay_event.v1"
+  },
+  "consistency": {
+    "case_partition_key": "case_id",
+    "parallel_workers": 4,
+    "parallel_matches_serial": true,
+    "boundary": "case-local replay only; cross-case transactions require external storage semantics"
+  },
+  "replay": {
+    "iterations": 20,
+    "elapsed_ms_per_iteration": 0.062,
+    "events_per_second": 816653.3,
+    "cases_per_second": 192153.7,
+    "replay_digest": "c43816d44410cea91fad9349828945ea2ed8969500e5731a29c4bebcee11f8c3",
+    "resume_cursor": {
+      "case_id": "C012",
+      "timestamp": "2026-01-03T09:00:00Z",
+      "event_id": "C012-02-goods_receipt-na"
+    },
+    "violations_by_code": {}
+  },
+  "readiness": {
+    "status": "pass",
+    "findings": [],
+    "production_note": "This report checks replay hygiene. Production operation still needs persistent storage, queue semantics, auth, monitoring, rollback, and ERP-specific mapping review."
+  },
+  "parse_errors": []
+}
